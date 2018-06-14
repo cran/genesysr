@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Nora Castaneda &amp; Matija Obreza" />
+
+<meta name="date" content="2018-06-12" />
+
+<title>genesysr Tutorial</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">genesysr Tutorial</h1>
+<h4 class="author"><em>Nora Castaneda &amp; Matija Obreza</em></h4>
+<h4 class="date"><em>2018-06-12</em></h4>
+
+
+
+<div id="querying-genesys-pgr" class="section level1">
+<h1>Querying Genesys PGR</h1>
+<p><a href="https://www.genesys-pgr.org">Genesys PGR</a> is the global database on plant genetic resources maintained <em>ex situ</em> in national, regional and international genebanks around the world.</p>
+<p><strong>genesysr</strong> uses the <a href="https://www.genesys-pgr.org/doc/0/apis">Genesys API</a> to query Genesys data.</p>
+<p>Accessing data with <strong>genesysr</strong> is similar to downloading data in CSV or Excel format and loading it into R.</p>
+<div id="for-the-impatient" class="section level2">
+<h2>For the impatient</h2>
+<p>Accession passport data is retrieved with the <code>fetch_accessions</code> function.</p>
+<p>The database is queried by providing a <code>filter</code> (see Filters below):</p>
+<pre><code>## Setup: use Genesys Sandbox environment
+# genesysr::setup_sandbox() 
+# genesysr::setup_production() # This is initialized by default when loading genesysr
+
+# Open a browser: login to Genesys and authorize access
+genesysr::user_login()
+
+# Retrieve all accession data for genus *Musa*
+musa &lt;- fetch_accessions(filters = list(taxonomy.genus = c('Musa')))
+
+# Retrieve all accession data for the Musa International Transit Center, Bioversity International
+itc &lt;- fetch_accessions(list(institute.code = c('BEL084')))
+
+# Retrieve all accession data for the Musa International Transit Center, Bioversity International (BEL084) and the International Center for Tropical Agriculture (COL003)
+some &lt;- fetch_accessions(list(institute.code = c('BEL084','COL003')))</code></pre>
+<p><strong>genesysr</strong> provides utility functions to create <code>filter</code> objects using <a href="https://www.genesys-pgr.org/doc/0/basics#mcpd">Multi-Crop Passport Descriptors (MCPD)</a> definitions:</p>
+<pre><code># Retrieve data by country of origin (MCPD)
+fetch_accessions(mcpd_filter(ORIGCTY = c(&quot;DEU&quot;, &quot;SVN&quot;)))</code></pre>
+</div>
+</div>
+<div id="processing-fetched-data" class="section level1">
+<h1>Processing fetched data</h1>
+<p>Fetched data is provided as a deeply nested list. To flatten the list, the following steps are suggested:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">require</span>(tidyverse)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">musa.flatten &lt;-<span class="st"> </span><span class="kw">lapply</span>(musa<span class="op">$</span>content, unlist) <span class="co"># looks good</span></a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">musa.flatten &lt;-<span class="st"> </span>musa.flatten <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">map_df</span>(bind_rows)</a></code></pre></div>
+</div>
+<div id="filters" class="section level1">
+<h1>Filters</h1>
+<p>The records returned by Genesys match all filters provided (<em>AND</em> operation), while individual filters allow for specifying multiple criteria (<em>OR</em> operation):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># (genus == Musa) AND ((origcty == NGA) OR (origcty == CIV))</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">filter &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">taxonomy.genus =</span> <span class="kw">c</span>(<span class="st">'Musa'</span>), <span class="dt">orgCty.iso3 =</span> <span class="kw">c</span>(<span class="st">'NGA'</span>, <span class="st">'CIV'</span>))</a></code></pre></div>
+<p>There are a number of filtering options to retrieve current data from Genesys. The <code>filter</code> object is a named <code>list()</code> where names match a Genesys filter and the value specifies the criteria to match.</p>
+<div id="taxonomy" class="section level3">
+<h3>Taxonomy</h3>
+<p><code>taxonomy.genus</code> filters by a <em>list</em> of genera.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">filters &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">taxonomy.genus =</span> <span class="kw">c</span>(<span class="st">'Hordeum'</span>, <span class="st">'Musa'</span>))</a></code></pre></div>
+<p><code>taxonomy.species</code> filters by a <em>list</em> of species.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">filters &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">taxonomy.genus =</span> <span class="kw">c</span>(<span class="st">'Hordeum'</span>), <span class="dt">taxonomy.species =</span> <span class="kw">c</span>(<span class="st">'vulgare'</span>))</a></code></pre></div>
+</div>
+<div id="origin-of-material" class="section level3">
+<h3>Origin of material</h3>
+<p><code>orgCty.iso3</code> filters by ISO3 code of country of origin of PGR material.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="co"># Material originating from Germany (DEU) and France (FRA)</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">filters &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">orgCty.iso3 =</span> <span class="kw">c</span>(<span class="st">'DEU'</span>, <span class="st">'FRA'</span>))</a></code></pre></div>
+<p><code>geo.latitude</code> and <code>geo.longitude</code> filters by latitude/longitude (in decimal format) of the collecting site.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># </span><span class="al">TBD</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">filters &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">geo.latitude =</span> genesysr<span class="op">::</span><span class="kw">range</span>(<span class="op">-</span><span class="dv">10</span>, <span class="dv">30</span>), <span class="dt">geo.longitude =</span> genesysr<span class="op">::</span><span class="kw">range</span>(<span class="dv">30</span>, <span class="dv">50</span>))</a></code></pre></div>
+</div>
+<div id="holding-institute" class="section level3">
+<h3>Holding institute</h3>
+<p><code>institute.code</code> filters by a <em>list</em> of FAO WIEWS institute codes of the holding institutes.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="co"># Filter for ITC (BEL084) and CIAT (COL003)</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">list</span>(<span class="dt">institute.code =</span> <span class="kw">c</span>(<span class="st">'BEL084'</span>, <span class="st">'COL003'</span>))</a></code></pre></div>
+<p><code>institute.country.iso3</code> filters by a <em>list</em> of ISO3 country codes of country of the holding institute.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="co"># Filter for genebanks in Slovenia (SVN) and Belgium (BEL)</span></a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw">list</span>(<span class="dt">institute.country.iso3 =</span> <span class="kw">c</span>(<span class="st">'SVN'</span>, <span class="st">'BEL'</span>))</a></code></pre></div>
+</div>
+</div>
+<div id="selecting-columns" class="section level1">
+<h1>Selecting columns</h1>
+<p>Genesys API returns a lot of variables for accession passport data. To reduce the amount of data to be processed and kept in memory, select the columns of interest with a <code>selector</code> function:</p>
+<pre><code># Keep only accession id, acceNumb and instCode for *Musa* data
+fetch_accessions(list(taxonomy.genus = c('Musa')), selector = function(x) {
+  list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
+})</code></pre>
+<p>To list the variable names returned by the Genesys APIs, test the response and select columns of interest:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">filters &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">accn &lt;-<span class="st"> </span><span class="kw">fetch_accessions</span>(filters)</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4"><span class="co"># Print names used in JSON response from Genesys</span></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5"><span class="kw">sort</span>(<span class="kw">unique</span>(<span class="kw">names</span>(<span class="kw">unlist</span>(accn<span class="op">$</span>content))))</a></code></pre></div>
+</div>
+<div id="step-by-step-example" class="section level1">
+<h1>Step-by-step example</h1>
+<p>Let’s take a look of all the process of fetching accession passport data from Genesys.</p>
+<ol style="list-style-type: decimal">
+<li>Load genesysr</li>
+</ol>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">library</span>(genesysr)</a></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Setup using user credentials</li>
+</ol>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">setup_sandbox</span>()</a>
+<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw">user_login</span>()</a></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Fetch data</li>
+</ol>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">musa &lt;-<span class="st"> </span>genesysr<span class="op">::</span><span class="kw">fetch_accessions</span>(<span class="kw">list</span>(<span class="dt">taxonomy.genus =</span> <span class="kw">c</span>(<span class="st">'Musa'</span>)))</a></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>Flatten data into data frame</li>
+</ol>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">require</span>(tidyverse)</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">musa.flatten &lt;-<span class="st"> </span><span class="kw">lapply</span>(musa<span class="op">$</span>content, unlist) <span class="co">#looks good</span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">musa.flatten &lt;-<span class="st"> </span>musa.flatten <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">map_df</span>(bind_rows)</a></code></pre></div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
