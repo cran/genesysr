@@ -16,6 +16,7 @@ Querying Genesys PGR
 maintained *ex situ* in national, regional and international genebanks around the world.
 
 **genesysr** uses the [Genesys API](https://www.genesys-pgr.org/doc/0/apis) to query Genesys data.
+The API is accessible at https://api.genesys-pgr.org.
 
 Accessing data with **genesysr** is similar to downloading data in CSV or Excel format and loading
 it into R.
@@ -28,7 +29,7 @@ The database is queried by providing a `filter` (see Filters below):
 
 ```
 ## Setup: use Genesys Sandbox environment
-# genesysr::setup_sandbox() 
+# genesysr::setup_sandbox()
 # genesysr::setup_production() # This is initialized by default when loading genesysr
 
 # Open a browser: login to Genesys and authorize access
@@ -44,7 +45,7 @@ itc <- fetch_accessions(list(institute.code = c('BEL084')))
 some <- fetch_accessions(list(institute.code = c('BEL084','COL003')))
 ```
 
-**genesysr** provides utility functions to create `filter` objects using [Multi-Crop Passport Descriptors (MCPD)](https://www.genesys-pgr.org/doc/0/basics#mcpd) definitions:
+**genesysr** provides utility functions to create `filter` objects using [Multi-Crop Passport Descriptors (MCPD)](https://www.genesys-pgr.org/documentation/basics) definitions:
 
 ```
 # Retrieve data by country of origin (MCPD)
@@ -63,7 +64,7 @@ musa.flatten <- musa.flatten %>% map_df(bind_rows)
 
 # Filters
 
-The records returned by Genesys match all filters provided (*AND* operation), while individual filters 
+The records returned by Genesys match all filters provided (*AND* operation), while individual filters
 allow for specifying multiple criteria (*OR* operation):
 
 ```r

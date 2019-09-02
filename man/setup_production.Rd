@@ -7,5 +7,5 @@
 setup_production()
 }
 \description{
-Use the Genesys R Client with <https://www.genesys-pgr.org> requiring \code{\link{user_login}}
+Use the Genesys R Client with <https://api.genesys-pgr.org> requiring \code{\link{user_login}}
 }

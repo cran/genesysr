@@ -7,7 +7,7 @@
 setup(server = NULL, client_id = NULL, client_secret = NULL)
 }
 \arguments{
-\item{server}{Server base URL (e.g. "https://www.genesys-pgr.org" or "https://sandbox.genesys-pgr.org")}
+\item{server}{Server base URL (e.g. "https://api.genesys-pgr.org" or "https://api.sandbox.genesys-pgr.org")}
 
 \item{client_id}{OAuth client ID}
 

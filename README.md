@@ -51,7 +51,7 @@ Accessing Genesys **without user interaction** requires that a client is registe
 ```R
 # Setup
 library('genesysr')
-genesysr::setup(server = "https://www.genesys-pgr.org",
+genesysr::setup(server = "https://api.genesys-pgr.org",
   client_id = "someId.....@www.genesys-pgr.org",
   client_secret = "your-private-secret")
 

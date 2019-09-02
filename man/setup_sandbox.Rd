@@ -7,5 +7,5 @@
 setup_sandbox()
 }
 \description{
-Use the Genesys R Client with <https://sandbox.genesys-pgr.org> requiring \code{\link{user_login}}
+Use the Genesys R Client with <https://api.sandbox.genesys-pgr.org> requiring \code{\link{user_login}}
 }

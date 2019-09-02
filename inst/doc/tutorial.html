@@ -7,22 +7,23 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="author" content="Nora Castaneda &amp; Matija Obreza" />
 
-<meta name="date" content="2018-06-12" />
+<meta name="date" content="2019-09-02" />
 
 <title>genesysr Tutorial</title>
 
 
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
+<style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
+a.sourceLine:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -35,13 +36,11 @@ code.sourceCode { white-space: pre-wrap; }
 a.sourceLine { text-indent: -1em; padding-left: 1em; }
 }
 pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
+  { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
   { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -83,7 +82,29 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
 </style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -271,6 +292,9 @@ code > span.al { color: #ff0000; font-weight: bold; }
 code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
+
+
+
 </head>
 
 <body>
@@ -279,22 +303,22 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 
 <h1 class="title toc-ignore">genesysr Tutorial</h1>
-<h4 class="author"><em>Nora Castaneda &amp; Matija Obreza</em></h4>
-<h4 class="date"><em>2018-06-12</em></h4>
+<h4 class="author">Nora Castaneda &amp; Matija Obreza</h4>
+<h4 class="date">2019-09-02</h4>
 
 
 
 <div id="querying-genesys-pgr" class="section level1">
 <h1>Querying Genesys PGR</h1>
 <p><a href="https://www.genesys-pgr.org">Genesys PGR</a> is the global database on plant genetic resources maintained <em>ex situ</em> in national, regional and international genebanks around the world.</p>
-<p><strong>genesysr</strong> uses the <a href="https://www.genesys-pgr.org/doc/0/apis">Genesys API</a> to query Genesys data.</p>
+<p><strong>genesysr</strong> uses the <a href="https://www.genesys-pgr.org/doc/0/apis">Genesys API</a> to query Genesys data. The API is accessible at <a href="https://api.genesys-pgr.org" class="uri">https://api.genesys-pgr.org</a>.</p>
 <p>Accessing data with <strong>genesysr</strong> is similar to downloading data in CSV or Excel format and loading it into R.</p>
 <div id="for-the-impatient" class="section level2">
 <h2>For the impatient</h2>
 <p>Accession passport data is retrieved with the <code>fetch_accessions</code> function.</p>
 <p>The database is queried by providing a <code>filter</code> (see Filters below):</p>
 <pre><code>## Setup: use Genesys Sandbox environment
-# genesysr::setup_sandbox() 
+# genesysr::setup_sandbox()
 # genesysr::setup_production() # This is initialized by default when loading genesysr
 
 # Open a browser: login to Genesys and authorize access
@@ -308,7 +332,7 @@ itc &lt;- fetch_accessions(list(institute.code = c('BEL084')))
 
 # Retrieve all accession data for the Musa International Transit Center, Bioversity International (BEL084) and the International Center for Tropical Agriculture (COL003)
 some &lt;- fetch_accessions(list(institute.code = c('BEL084','COL003')))</code></pre>
-<p><strong>genesysr</strong> provides utility functions to create <code>filter</code> objects using <a href="https://www.genesys-pgr.org/doc/0/basics#mcpd">Multi-Crop Passport Descriptors (MCPD)</a> definitions:</p>
+<p><strong>genesysr</strong> provides utility functions to create <code>filter</code> objects using <a href="https://www.genesys-pgr.org/documentation/basics">Multi-Crop Passport Descriptors (MCPD)</a> definitions:</p>
 <pre><code># Retrieve data by country of origin (MCPD)
 fetch_accessions(mcpd_filter(ORIGCTY = c(&quot;DEU&quot;, &quot;SVN&quot;)))</code></pre>
 </div>
@@ -390,6 +414,9 @@ fetch_accessions(list(taxonomy.genus = c('Musa')), selector = function(x) {
 <a class="sourceLine" id="cb16-3" data-line-number="3">musa.flatten &lt;-<span class="st"> </span>musa.flatten <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">map_df</span>(bind_rows)</a></code></pre></div>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

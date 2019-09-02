@@ -14,32 +14,35 @@
 
 .genesysEnv <- new.env(parent = emptyenv())
 
-#' Configure package defaults
+#' Configure package defaults on load
+#' 
+#' @param libname Library name
+#' @param pkgname Package name
 .onLoad <- function(libname, pkgname) {
   setup_production()
 }
 
 #' Setup for Genesys Production
 #'
-#' Use the Genesys R Client with <https://www.genesys-pgr.org> requiring \code{\link{user_login}}
+#' Use the Genesys R Client with <https://api.genesys-pgr.org> requiring \code{\link{user_login}}
 #'
 #' @export
 setup_production <- function() {
-  setup(server = "https://www.genesys-pgr.org", client_id = "oHgJR.NjcdJAIB175gBDbuLEK3@www.genesys-pgr.org", client_secret = "public")
+  setup(server = "https://api.genesys-pgr.org", client_id = "oHgJR.NjcdJAIB175gBDbuLEK3@www.genesys-pgr.org", client_secret = "public")
 }
 
 #' Setup for Genesys Sandbox
 #'
-#' Use the Genesys R Client with <https://sandbox.genesys-pgr.org> requiring \code{\link{user_login}}
+#' Use the Genesys R Client with <https://api.sandbox.genesys-pgr.org> requiring \code{\link{user_login}}
 #'
 #' @export
 setup_sandbox <- function() {
-  setup(server = "https://sandbox.genesys-pgr.org", client_id = "cCS6e.BAn9u2WkhIwgxBLxOVqZ@sandbox.genesys-pgr.org", client_secret = NULL)
+  setup(server = "https://api.sandbox.genesys-pgr.org", client_id = "cCS6e.BAn9u2WkhIwgxBLxOVqZ@sandbox.genesys-pgr.org", client_secret = NULL)
 }
 
 #' Configure the Genesys environment
 #'
-#' @param server Server base URL (e.g. "https://www.genesys-pgr.org" or "https://sandbox.genesys-pgr.org")
+#' @param server Server base URL (e.g. "https://api.genesys-pgr.org" or "https://api.sandbox.genesys-pgr.org")
 #' @param client_id OAuth client ID
 #' @param client_secret OAuth client secret
 #'
