@@ -14,3 +14,4 @@
 \description{
 Configure package defaults on load
 }
+\keyword{internal}

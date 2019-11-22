@@ -1,6 +1,6 @@
 ---
 title: "genesysr Tutorial"
-author: "Nora Castaneda & Matija Obreza"
+author: "Matija Obreza & Nora Castaneda"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -23,7 +23,7 @@ it into R.
 
 ## For the impatient
 
-Accession passport data is retrieved with the `fetch_accessions` function.
+Accession passport data is retrieved with the `get_accessions` function.
 
 The database is queried by providing a `filter` (see Filters below):
 
@@ -35,69 +35,88 @@ The database is queried by providing a `filter` (see Filters below):
 # Open a browser: login to Genesys and authorize access
 genesysr::user_login()
 
-# Retrieve all accession data for genus *Musa*
-musa <- fetch_accessions(filters = list(taxonomy.genus = c('Musa')))
+# Retrieve first 1000 accessions for genus *Musa*
+musa <- get_accessions(filters = list(taxonomy = list(genus = c('Musa'))), at.least = 1000)
+# Or retrieve all accession data for genus *Musa*
+musa <- get_accessions(filters = list(taxonomy = list(genus = c('Musa'))))
 
 # Retrieve all accession data for the Musa International Transit Center, Bioversity International
-itc <- fetch_accessions(list(institute.code = c('BEL084')))
+itc <- get_accessions(list(institute = list(code = c('BEL084'))))
 
 # Retrieve all accession data for the Musa International Transit Center, Bioversity International (BEL084) and the International Center for Tropical Agriculture (COL003)
-some <- fetch_accessions(list(institute.code = c('BEL084','COL003')))
+some <- get_accessions(list(institute = list(code = c('BEL084','COL003'))))
 ```
 
 **genesysr** provides utility functions to create `filter` objects using [Multi-Crop Passport Descriptors (MCPD)](https://www.genesys-pgr.org/documentation/basics) definitions:
 
 ```
 # Retrieve data by country of origin (MCPD)
-fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
+get_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
 ```
 
 # Processing fetched data
 
-Fetched data is provided as a deeply nested list. To flatten the list, the following steps are suggested:
+The data is provided by Genesys as CSV. Where multiple values are possible for a column,
+there will be multiple columns. For example, accession `STORAGE` may be provided as:
 
-```r
-require(tidyverse)
-musa.flatten <- lapply(musa$content, unlist) # looks good
-musa.flatten <- musa.flatten %>% map_df(bind_rows)
-```
+|...|storage1|storage2|storage3|
+|--|--|--|--|
+|...|10|20|30|
+|...|30|40|*NA*|
+|...|30|*NA*|*NA*|
+|...|10|20|30|
 
 # Filters
+
+The `filter` object is a named `list()` where names match a Genesys filter and the value
+specifies the criteria to match.
 
 The records returned by Genesys match all filters provided (*AND* operation), while individual filters
 allow for specifying multiple criteria (*OR* operation):
 
 ```r
-# (genus == Musa) AND ((origcty == NGA) OR (origcty == CIV))
-filter <- list(taxonomy.genus = c('Musa'), orgCty.iso3 = c('NGA', 'CIV'))
+# (GENUS == Musa) AND ((ORIGCTY == NGA) OR (ORIGCTY == CIV))
+filter <- list(taxonomy = list(genus = c('Musa'), species = c('aa')), countryOfOrigin = list(iso3 = c('NGA', 'CIV')))
+
+# OR
+filter <- list();
+filter$taxonomy$genus = c('Musa')
+filter$taxonomy$species = c('aa')
+filter$countryOfOrigin$iso3 = c('NGA', 'CIV')
+
+# See filter object as JSON
+jsonlite::toJSON(filters)
 ```
 
-There are a number of filtering options to retrieve current data from Genesys.
-The `filter` object is a named `list()` where names match a Genesys filter and the value
-specifies the criteria to match.
-
+There are a number of filtering options to retrieve data from Genesys. Best explore how filtering 
+works on the actual website https://www.genesys-pgr.org/a/overview by inspecting the HTTP requests
+sent by your browser to the API server and then replicating them here.
 
 ### Taxonomy
 
-`taxonomy.genus` filters by a *list* of genera.
+`taxonomy$genus` filters by a *list* of genera.
 
 ```r
-filters <- list(taxonomy.genus = c('Hordeum', 'Musa'))
+filters <- list(taxonomy = list(genus = c('Hordeum', 'Musa')))
+# Print
+jsonlite::toJSON(filters)
 ```
 
-`taxonomy.species` filters by a *list* of species.
+`taxonomy$species` filters by a *list* of species.
 
 ```r
-filters <- list(taxonomy.genus = c('Hordeum'), taxonomy.species = c('vulgare'))
+filters <- list(taxonomy = list(genus = c('Hordeum'), species = c('vulgare')))
+# Print
+jsonlite::toJSON(filters)
 ```
 
 ### Origin of material
 
-`orgCty.iso3` filters by ISO3 code of country of origin of PGR material.
+`countryOfOrigin$iso3` filters by ISO3 code of country of origin of PGR material.
 
 ```r
 # Material originating from Germany (DEU) and France (FRA)
-filters <- list(orgCty.iso3 = c('DEU', 'FRA'))
+filters <- list(countryOfOrigin = list(iso3 = c('DEU', 'FRA')))
 ```
 
 `geo.latitude` and `geo.longitude` filters by latitude/longitude (in decimal format) of the
@@ -105,43 +124,41 @@ collecting site.
 
 ```r
 # TBD
-filters <- list(geo.latitude = genesysr::range(-10, 30), geo.longitude = genesysr::range(30, 50))
+filters <- list(geo = list(latitude = genesysr::range(-10, 30), longitude = genesysr::range(30, 50)))
 ```
 
 
 ### Holding institute
 
-`institute.code` filters by a *list* of FAO WIEWS institute codes of the holding institutes.
+`institute$code` filters by a *list* of FAO WIEWS institute codes of the holding institutes.
 
 ```r
 # Filter for ITC (BEL084) and CIAT (COL003)
-list(institute.code = c('BEL084', 'COL003'))
+list(institute = list(code = c('BEL084', 'COL003')))
 ```
 
-`institute.country.iso3` filters by a *list* of ISO3 country codes of country of the holding institute.
+`institute$country$iso3` filters by a *list* of ISO3 country codes of country of the holding institute.
 
 ```r
 # Filter for genebanks in Slovenia (SVN) and Belgium (BEL)
-list(institute.country.iso3 = c('SVN', 'BEL'))
+list(institute = list(country = list(iso3 = c('SVN', 'BEL'))))
 ```
 
 # Selecting columns
 
 Genesys API returns a lot of variables for accession passport data.
-To reduce the amount of data to be processed and kept in memory, select the columns of interest with a `selector` function:
+To reduce the amount of data to be processed and kept in memory, select the columns of interest the `fields` vector:
 
 ```
-# Keep only accession id, acceNumb and instCode for *Musa* data
-fetch_accessions(list(taxonomy.genus = c('Musa')), selector = function(x) {
-  list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
-})
+# Fetch only accession id, storage and taxonomic data for *Musa*
+musa <- genesysr::get_accessions(list(taxonomy = list(genus = c('Musa'))), fields = c("taxonomy", "storage", "id"))
 ```
 
 To list the variable names returned by the Genesys APIs, test the response and select columns of interest:
 
 ```r
-filters <- list()
-accn <- fetch_accessions(filters)
+# fetch_accessions uses the JSON format
+accn <- fetch_accessions(filters = list(), at.least = 100)
 
 # Print names used in JSON response from Genesys
 sort(unique(names(unlist(accn$content))))
@@ -159,6 +176,7 @@ library(genesysr)
 ```
 
 2. Setup using user credentials
+
 ```r
 setup_sandbox()
 user_login()
@@ -167,13 +185,11 @@ user_login()
 3. Fetch data
 
 ```r
-musa <- genesysr::fetch_accessions(list(taxonomy.genus = c('Musa')))
+musa <- genesysr::get_accessions(list(taxonomy = list(genus = c('Musa'))), at.least = 1000)
 ```
 
-4. Flatten data into data frame
+4. Identify columns of interest
 
 ```r
-require(tidyverse)
-musa.flatten <- lapply(musa$content, unlist) #looks good
-musa.flatten <- musa.flatten %>% map_df(bind_rows)
+names(musa)
 ```

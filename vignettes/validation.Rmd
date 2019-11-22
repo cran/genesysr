@@ -1,0 +1,65 @@
+---
+title: "Validating passport data"
+author: "Matija Obreza"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Validating passport data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Validating passport data
+========================
+
+[Genesys PGR](https://www.genesys-pgr.org) is the global database on plant genetic resources
+maintained *ex situ* in national, regional and international genebanks around the world.
+
+**genesysr** provides functions to check accession passport data with the [Genesys Validator](https://validator.genesys-pgr.org). This service provides
+tools to check spelling of taxonomic names against the GRIN-Taxonomy database
+and coordinates of the collecting site against the country of origin.
+
+# Scientific names spell-check
+
+The tool checks data against the GRIN-Global Taxonomy database maintained by USDA-ARS, distributed with the GRIN-Global installer. See [GRIN Taxonomy for Plants](https://npgsweb.ars-grin.gov/gringlobal/taxon/abouttaxonomy.aspx). 
+
+Only the following MCPD columns will be checked for taxonomic data: `GENUS`, `SPECIES`, `SPAUTHOR`, `SUBTAXA`, `SUBTAUTHOR`.
+
+|id|GENUS|SPECIES|SPAUTHOR|SUBTAXA|SUBTAUTHOR|
+|--|--|--|--|--|--|
+|1|Onobrychis||viciifolia|||
+|2|Agrostis|tenuis|Sibth.|||
+|3|Arachis|hypogaea|L.|||
+|4|Arrhenatherum|elatius|(L.) J. et C.Presl.|var. elatius|(L.) J. et C.|Presl.|
+|5|Avena|sativa||||
+|6|Dactylis|glomerata|L.|subsp juncinella||
+|7|Linum|usitatissimum|L.|var intermedium|Vav. et Ell.|
+|8|Prunus|domestica|L.|subsp||domestica||
+|9|Prunus||hybrid|||
+
+```
+taxaCheck <- genesysr::check_taxonomy(mcpd);
+```
+
+The validator returns all incoming columns, but annotates the taxonomic 
+data with new `*_check` columns.
+
+
+# Checking coordinates
+
+Geo tests require `DECLATITUDE`, `DECLONGITUDE` and `ORIGCTY` for country border check and suggested coordinate fixes.
+
+
+|...|ORICTY|DECLATITUDE|DECLONGITUDE|
+|--|--|--|--|
+|...|DEU|20|30|
+|...|SVN|40|*NA*|
+|...|NGA|*NA*|*NA*|
+|...|GTM|-90|30|
+
+```
+geoCheck <- genesysr::check_country(mcpd)
+```
+
+The validator returns all incoming columns, but annotates the taxonomic 
+data with new `*_check` columns.

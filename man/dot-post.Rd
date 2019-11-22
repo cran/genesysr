@@ -5,7 +5,7 @@
 \title{HTTP POST method}
 \usage{
 .post(path, query = NULL, body = NULL,
-  content.type = "application/json")
+  content.type = "application/json", accept = "application/json")
 }
 \arguments{
 \item{path}{API path}
@@ -22,3 +22,4 @@ httr response
 \description{
 HTTP POST method
 }
+\keyword{internal}

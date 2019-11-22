@@ -2,6 +2,8 @@
 
 The `genesysr` R package provides functions for authentication with Genesys and functions to fetch accession data from <https://www.genesys-pgr.org> database.
 
+Note: See NEWS.md
+
 ## Installing the development version
 
 ```R
@@ -63,5 +65,9 @@ genesysr::client_login()
 
 ```R
 filters <- mcpd_filter(ORIGCTY = c("DEU", "SVN"))
-accessions <- genesysr::fetch_accessions(filters)
+accessions <- genesysr::get_accessions(filters)
+
+# Sort columns, hand-pick first few columns
+require(data.table)
+setcolorder(accessions, unique(c("id", "instituteCode", "accessionNumber", "taxonomy.genus", sort(names(accessions)))))
 ```

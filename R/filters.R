@@ -44,6 +44,8 @@ MCPD <- list(
 #' @param DOI Accession DOI
 #' @param ORIGCTY Country of origin
 #' @param SAMPSTAT Biological status of sample
+#' @param GENUS List of genera
+#' @param SPECIES List of specific epithets (within specified genera)
 #'
 #' @examples
 #'  # Filter accessions from Mexico and Slovenia
@@ -51,13 +53,15 @@ MCPD <- list(
 #'
 #'
 #' @export
-mcpd_filter <- function(filter = list(), DOI = NULL, ORIGCTY = NULL, SAMPSTAT = NULL) {
+mcpd_filter <- function(filter = list(), DOI = NULL, ORIGCTY = NULL, SAMPSTAT = NULL, GENUS = NULL, SPECIES = NULL) {
   f <- c(filter)
 
   f <- filter_DOI(f, DOI)
   f <- filter_ORIGCTY(f, ORIGCTY)
   f <- filter_SAMPSTAT(f, SAMPSTAT)
-
+  f <- filter_GENUS(f, GENUS)
+  f <- filter_SPECIES(f, SPECIES)
+  
   f
 }
 
@@ -80,7 +84,7 @@ filter_DOI <- function(filter = list(), DOI) {
 filter_ORIGCTY <- function(filter = list(), ORIGCTY) {
   f <- c(filter)
   if (!is.null(ORIGCTY)) {
-    f$orgCty.iso3 = c(f$orgCty.iso3, ORIGCTY)
+    f$countryOfOrigin$iso3 = c(f$countryOfOrigin$iso3, ORIGCTY)
   }
   f
 }
@@ -93,6 +97,32 @@ filter_SAMPSTAT <- function(filter = list(), SAMPSTAT) {
   f <- c(filter)
   if (!is.null(SAMPSTAT)) {
     f$sampStat = c(f$sampStat, SAMPSTAT)
+  }
+  f
+}
+
+
+#' Add filter by genus
+#' @param filter Existing filters (or blank list if not provided)
+#' @param GENUS List of genera
+#' @export
+filter_GENUS <- function(filter = list(), GENUS) {
+  f <- c(filter)
+  if (!is.null(GENUS)) {
+    f$taxonomy$genus = c(f$taxonomy$genus, GENUS)
+  }
+  f
+}
+
+
+#' Add filter on specific epithet
+#' @param filter Existing filters (or blank list if not provided)
+#' @param SPECIES List of specific epithets
+#' @export
+filter_SPECIES <- function(filter = list(), SPECIES) {
+  f <- c(filter)
+  if (!is.null(SPECIES)) {
+    f$taxonomy$species = c(f$taxonomy$species, SPECIES)
   }
   f
 }

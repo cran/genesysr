@@ -18,6 +18,7 @@
 #' 
 #' @param libname Library name
 #' @param pkgname Package name
+#' @keywords internal
 .onLoad <- function(libname, pkgname) {
   setup_production()
 }
@@ -80,6 +81,7 @@ authorization <- function(authorization) {
 }
 
 #' Ensure that environment has OAuth token
+#' @keywords internal
 .check_auth <- function() {
   if (is.null(.genesysEnv$Authorization)) {
     warning("You must first authorize with Genesys with user_login() or client_login(...).");
@@ -158,9 +160,10 @@ client_login <- function() {
 }
 
 
+#' @keywords internal
 .api_call <- function(path, method = "get") {
   .check_auth()
-  resp <- httr::GET(api_url(path), httr::add_headers(
+  resp <- httr::GET(path, httr::add_headers(
     Authorization = .genesysEnv$Authorization
     )
   )
@@ -174,22 +177,37 @@ client_login <- function() {
 }
 
 
-#' Get full Genesys API URL for a specific path
+#' Get full Genesys API v1 URL for a specific path
 #'
-#' @param path relative path of the API endpoint (e.g. \code{/me})
+#' @param path relative path of the API v1 endpoint (e.g. \code{/me})
 #'
 #' @return Absolute URL to an API call
 #' @export
 #'
 #' @examples
-#'  api_url("/me")
-api_url <- function(path) {
-  paste0(.genesysEnv$server, "/api/v0", path)
+#'  api1_url("/me")
+api1_url <- function(path) {
+  paste0(.genesysEnv$server, "/api/v1", path)
 }
 
+
+#' Get full Genesys API v1 URL for a specific path
+#'
+#' @param path relative path of the API v1 endpoint (e.g. \code{/me})
+#'
+#' @return Absolute URL to an API call
+#' @export
+#'
+#' @examples
+#'  api2_url("/me")
+api2_url <- function(path) {
+  paste0(.genesysEnv$server, "/api/v2", path)
+}
+
+#' @keywords internal
 .get <- function(path, query = NULL) {
   .check_auth()
-  resp <- httr::GET(api_url(path), query = query, httr::add_headers(
+  resp <- httr::GET(path, query = query, httr::add_headers(
     Authorization = .genesysEnv$Authorization
   ))
   if (httr::http_type(resp) != "application/json") {
@@ -206,7 +224,8 @@ api_url <- function(path) {
 #' @param content.type Content-Type of the body
 #'
 #' @return httr response
-.post <- function(path, query = NULL, body = NULL, content.type = "application/json") {
+#' @keywords internal
+.post <- function(path, query = NULL, body = NULL, content.type = "application/json", accept = "application/json") {
   .check_auth()
   content <- jsonlite::toJSON(body)
   if (! is.null(body) && length(body) == 0) {
@@ -214,12 +233,20 @@ api_url <- function(path) {
     content <- "{}"
   }
   # print(paste("Body is:", content))
-  resp <- httr::POST(api_url(path), query = query, httr::add_headers(
+  resp <- httr::POST(path, query = query, httr::add_headers(
     Authorization = .genesysEnv$Authorization,
-    "Content-Type" = content.type
+    "Content-Type" = content.type,
+    "Accept" = accept
   ), body = content)
-  if (httr::http_type(resp) != "application/json") {
-    stop("API did not return json", call. = FALSE)
+  if (httr::status_code(resp) != 200) {
+    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200. See response content:\n", httr::content(resp), call. = FALSE)
   }
+  if (httr::http_type(resp) != accept) {
+    stop("API did not return ", accept, " but Content-Type: ", httr::content(resp), ". See response content:\n", httr::content(resp), call. = FALSE)
+  }
+  
+  # if (httr::http_type(resp) != "application/json") {
+  #  stop("API did not return json", call. = FALSE)
+  # }
   resp
 }

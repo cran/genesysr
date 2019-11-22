@@ -5,7 +5,7 @@
 \title{Make or adjust filter using MCPD terminology}
 \usage{
 mcpd_filter(filter = list(), DOI = NULL, ORIGCTY = NULL,
-  SAMPSTAT = NULL)
+  SAMPSTAT = NULL, GENUS = NULL, SPECIES = NULL)
 }
 \arguments{
 \item{filter}{Existing filters (or blank list if not provided)}
@@ -15,6 +15,10 @@ mcpd_filter(filter = list(), DOI = NULL, ORIGCTY = NULL,
 \item{ORIGCTY}{Country of origin}
 
 \item{SAMPSTAT}{Biological status of sample}
+
+\item{GENUS}{List of genera}
+
+\item{SPECIES}{List of specific epithets (within specified genera)}
 }
 \description{
 See FAO/Bioversity Multi-Crop Passport Descriptors.
