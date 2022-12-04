@@ -15,7 +15,7 @@ Querying Genesys PGR
 [Genesys PGR](https://www.genesys-pgr.org) is the global database on plant genetic resources
 maintained *ex situ* in national, regional and international genebanks around the world.
 
-**genesysr** uses the [Genesys API](https://www.genesys-pgr.org/doc/0/apis) to query Genesys data.
+**genesysr** uses the [Genesys API](https://www.genesys-pgr.org/documentation/apis) to query Genesys data.
 The API is accessible at https://api.genesys-pgr.org.
 
 Accessing data with **genesysr** is similar to downloading data in CSV or Excel format and loading

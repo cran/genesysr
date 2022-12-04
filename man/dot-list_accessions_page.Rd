@@ -4,8 +4,13 @@
 \alias{.list_accessions_page}
 \title{List accession passport data (paginated)}
 \usage{
-.list_accessions_page(filters = list(), page = 0, size = 1000,
-  fields = NULL, selector = NULL)
+.list_accessions_page(
+  filters = list(),
+  page = 0,
+  size = 1000,
+  fields = NULL,
+  selector = NULL
+)
 }
 \value{
 table

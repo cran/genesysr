@@ -4,7 +4,9 @@
 \name{.MAX_ALLOWED_PAGES}
 \alias{.MAX_ALLOWED_PAGES}
 \title{Max pages to retrieve}
-\format{An object of class \code{numeric} of length 1.}
+\format{
+An object of class \code{numeric} of length 1.
+}
 \usage{
 .MAX_ALLOWED_PAGES
 }

@@ -1,14 +1,18 @@
-# November 2019
+## version 1.0.1
 
-Updated from Genesys API v0 calls to API v1.
+- Updated API calls to validator.genesys-pgr.org with `escapeChar`
+- Better handling of CSV response from validator
 
-Note: The filter structure has changed. See Tutorial.
+## version 1.0.0
 
-# August 2019
+- Updated from Genesys API v0 calls to API v1.
 
-Updated for API at api.genesys-pgr.org
+### Notes
 
-# June 2018
+The filter structure has changed. See Tutorial.
 
-First version of the Genesys API client for R is released.
+## version 0.9
+
+- August 2019: Updated for API at api.genesys-pgr.org
+- June 2018: First version of the Genesys API client for R is released.
 

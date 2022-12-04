@@ -4,8 +4,14 @@
 \alias{mcpd_filter}
 \title{Make or adjust filter using MCPD terminology}
 \usage{
-mcpd_filter(filter = list(), DOI = NULL, ORIGCTY = NULL,
-  SAMPSTAT = NULL, GENUS = NULL, SPECIES = NULL)
+mcpd_filter(
+  filter = list(),
+  DOI = NULL,
+  ORIGCTY = NULL,
+  SAMPSTAT = NULL,
+  GENUS = NULL,
+  SPECIES = NULL
+)
 }
 \arguments{
 \item{filter}{Existing filters (or blank list if not provided)}

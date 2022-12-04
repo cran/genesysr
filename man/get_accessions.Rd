@@ -4,8 +4,14 @@
 \alias{get_accessions}
 \title{Fetch accession passport data}
 \usage{
-get_accessions(filters = list(), page = 0, size = 1000,
-  fields = NULL, selector = NULL, at.least = NULL)
+get_accessions(
+  filters = list(),
+  page = 0,
+  size = 1000,
+  fields = NULL,
+  selector = NULL,
+  at.least = NULL
+)
 }
 \arguments{
 \item{filters}{an R \code{structure} with Genesys filters}

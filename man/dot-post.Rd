@@ -4,8 +4,13 @@
 \alias{.post}
 \title{HTTP POST method}
 \usage{
-.post(path, query = NULL, body = NULL,
-  content.type = "application/json", accept = "application/json")
+.post(
+  path,
+  query = NULL,
+  body = NULL,
+  content.type = "application/json",
+  accept = "application/json"
+)
 }
 \arguments{
 \item{path}{API path}

@@ -143,7 +143,7 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
     message(paste("Received 0 bytes"))
     data <- data.frame()
   } else {
-    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+    data <- utils::read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
     
     # Apply selector
     if (is.function(selector)) {
