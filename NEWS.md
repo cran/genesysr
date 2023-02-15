@@ -1,3 +1,8 @@
+## version 1.1.0
+
+- Added list_crops(), list_species() and list_institutes()
+- Added support to exclude fields in get_accessions()
+
 ## version 1.0.1
 
 - Updated API calls to validator.genesys-pgr.org with `escapeChar`

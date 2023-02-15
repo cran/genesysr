@@ -25,6 +25,7 @@ me <- function() {
   invisible(resp)
 }
 
+
 #' Fetch accession passport data (paginated)
 #'
 #' @param filters an R \code{structure} with Genesys filters
@@ -120,12 +121,17 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
 #' 
 #' @return table
 #' @keywords internal
-.list_accessions_page <- function(filters = list(), page = 0, size = 1000, fields = NULL, selector = NULL) {
+#' @importFrom utils read.csv
+.list_accessions_page <- function(filters = list(), page = 0, size = 1000, fields = NULL, exclude = NULL, selector = NULL) {
   start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
   query <- list(p = page, l = size)
   if (is.vector(fields)) {
     selected_fields <- stats::setNames(as.list(fields), rep('select', length(fields)))
     query <- c(query, selected_fields)
+  }
+  if (is.vector(exclude)) {
+    excluded_fields <- stats::setNames(as.list(exclude), rep('exclude', length(exclude)))
+    query <- c(query, excluded_fields)
   }
   resp <- .post(path = api1_url("/acn/list"), query = query, body = filters, accept = "text/csv")
   if (httr::status_code(resp) != 200) {
@@ -160,6 +166,7 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
 #' @param size number of records to load per page (page size)
 #' @param page the page index (0-based)
 #' @param fields list of fields to fetch from Genesys
+#' @param exclude list of field prefixes to exclude from the Genesys response
 #' @param selector NULL or a function to "select" variables of interest
 #' @param at.least stop fetching when at.least records are received from Genesys
 #'
@@ -183,10 +190,10 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
 #' 
 #' @export
 #' @return Paged data structure
-get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NULL, selector = NULL, at.least = NULL) {
+get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NULL, exclude = NULL, selector = NULL, at.least = NULL) {
 
   # Fetch first page to determine number of records
-  data <- .list_accessions_page(filters, page, size, fields, selector)
+  data <- .list_accessions_page(filters, page, size, fields, exclude, selector)
 
   while (page < .MAX_ALLOWED_PAGES && !(! is.null(at.least) && at.least <= nrow(data))) {
     page <- page + 1
@@ -195,7 +202,7 @@ get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NUL
       message(paste("Not requesting data after page", .MAX_ALLOWED_PAGES, "Stopping."))
       break
     }
-    p <- .list_accessions_page(filters, page, size, fields)
+    p <- .list_accessions_page(filters, page, size, fields, exclude, selector)
     
     if (nrow(p) == 0) {
       # print("Got last page")
@@ -286,4 +293,174 @@ download_pdci <- function(instituteCode, file = NULL) {
   }
   invisible(resp)
 }
+
+
+
+#' Fetch Genesys crops. Note that the list of Genesys crops does not fully
+#' correspond with various CROPNAME in MCPD provided by genebanks.
+#'
+#' @examples
+#' \dontrun{
+#'   # Retrieve all Genesys crops
+#'   crops <- genesysr::list_crops()
+#' }
+#' 
+#' @export
+#' @return Genesys crops
+list_crops <- function() {
+  
+  start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  resp <- .get(path = api1_url("/crops/list"), accept = "text/csv")
+  if (httr::status_code(resp) != 200) {
+    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
+  }
+  if (httr::http_type(resp) != "text/csv") {
+    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
+  }
+  end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  headers <- httr::headers(resp)
+  message(paste("Retrieved crops in", end_time - start_time, "ms."))
+  
+  body <- httr::content(resp, "text")
+  if (nchar(trimws(body)) == 0) {
+    message(paste("Received 0 bytes"))
+    data <- data.frame()
+  } else {
+    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+  }
+  data
+}
+
+
+
+#' Fetch taxonomic data of selected accessions.
+#'
+#' @param filters an R \code{structure} with Genesys filters
+#'
+#' @examples
+#' \dontrun{
+#'   # Retrieve taxa of selected accessions
+#'   taxa <- genesysr::list_species(mcpd_filter(INSTCODE = c("LBN002", "MEX002")))
+#' }
+#' 
+#' @seealso \code{\link{mcpd_filter}}
+#'
+#' @export
+#' @return Taxonomic records of selected accessions
+list_species <- function(filters = list()) {
+  
+  start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  resp <- .post(path = api1_url("/acn/species"), body = filters, accept = "text/csv")
+  if (httr::status_code(resp) != 200) {
+    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
+  }
+  if (httr::http_type(resp) != "text/csv") {
+    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
+  }
+  end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  headers <- httr::headers(resp)
+  message(paste("Retrieved taxonomic data in", end_time - start_time, "ms."))
+  
+  body <- httr::content(resp, "text")
+  if (nchar(trimws(body)) == 0) {
+    message(paste("Received 0 bytes"))
+    data <- data.frame()
+  } else {
+    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+  }
+  data
+}
+
+#' Fetch a page of data from Genesys
+#' 
+#' @param path API path
+#' @param filters Filters
+#' @param accept Accepted content type
+#' @param page Page to request
+#' @param size Size of page
+#' 
+#' @keywords internal
+.fetch_csv_page <- function(path, filters = list(), accept = "text/csv", page = 0, size = 1000) {
+  start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  resp <- .post(path, query = list(l = size, p = page), body = filters, accept = accept)
+  if (httr::status_code(resp) != 200) {
+    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
+  }
+  if (httr::http_type(resp) != accept) {
+    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
+  }
+  end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  headers <- httr::headers(resp)
+  message(paste("Retrieved institute data in", end_time - start_time, "ms."))
+  
+  body <- httr::content(resp, "text")
+  if (nchar(trimws(body)) == 0) {
+    message(paste("Received 0 bytes"))
+    data <- data.frame()
+  } else {
+    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+  }
+  data
+}
+
+#' List FAO WIEWS institutes.
+#'
+#' Institute filters:
+#' - code: list of WIEWS institute codes
+#' - accessions: boolean, TRUE list only institutes with accessions in Genesys, FALSE without accessions
+#' - country$code3: list of ISO3166 country codes
+#'
+#' @param filters an R \code{structure} with Institute filters
+#' @param at.least stop fetching when at.least records are received from Genesys
+#'
+#' @examples
+#' \dontrun{
+#'   # Retrieve taxa of selected accessions
+#'   filters <- c();
+#'   filters$accessions = TRUE; # Has accessions in Genesys
+#'   institutes <- genesysr::list_institutes(filters)
+#' }
+#' 
+#' @seealso \code{\link{mcpd_filter}}
+#'
+#' @export
+#' @return List of institutes
+list_institutes <- function(filters = list(), at.least = NULL) {
+
+  path <- api1_url("/wiews/list")
+  
+  # Fetch first page to determine number of records
+  data <- .fetch_csv_page(path, filters, page = 0, size = 100)
+  pages <- .MAX_ALLOWED_PAGES
+  
+  for (page in 1:pages) {
+    if (page > .MAX_ALLOWED_PAGES) {
+      # Break if over max pages
+      message(paste("Not requesting data after page", .MAX_ALLOWED_PAGES, "Stopping."))
+      break
+    }
+    p <- .fetch_csv_page(path, filters, page = page, size = 100)
+
+    if (nrow(p) == 0) {
+      # print("Got last page")
+      break
+    }
+    
+    data[setdiff(names(p), names(data))] <- NA
+    p[setdiff(names(data), names(p))] <- NA
+    data <- rbind(data, p)
+
+    if (length(p) == 0) {
+      # print("Got last page")
+      break
+    }
+    if (! is.null(at.least) && at.least <= length(data)) {
+      message(paste("Received", length(data), "of", at.least, "requested. Stopping."))
+      break
+    }
+  }
+
+  data
+}
+
 

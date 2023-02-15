@@ -41,6 +41,7 @@ MCPD <- list(
 #' See FAO/Bioversity Multi-Crop Passport Descriptors.
 #'
 #' @param filter Existing filters (or blank list if not provided)
+#' @param INSTCODE WIEWS Institute Code of the holding institute
 #' @param DOI Accession DOI
 #' @param ORIGCTY Country of origin
 #' @param SAMPSTAT Biological status of sample
@@ -53,7 +54,7 @@ MCPD <- list(
 #'
 #'
 #' @export
-mcpd_filter <- function(filter = list(), DOI = NULL, ORIGCTY = NULL, SAMPSTAT = NULL, GENUS = NULL, SPECIES = NULL) {
+mcpd_filter <- function(filter = list(), INSTCODE = NULL, DOI = NULL, ORIGCTY = NULL, SAMPSTAT = NULL, GENUS = NULL, SPECIES = NULL) {
   f <- c(filter)
 
   f <- filter_DOI(f, DOI)
@@ -61,7 +62,7 @@ mcpd_filter <- function(filter = list(), DOI = NULL, ORIGCTY = NULL, SAMPSTAT = 
   f <- filter_SAMPSTAT(f, SAMPSTAT)
   f <- filter_GENUS(f, GENUS)
   f <- filter_SPECIES(f, SPECIES)
-  
+  f <- filter_INSTCODE(f, INSTCODE)
   f
 }
 
@@ -123,6 +124,19 @@ filter_SPECIES <- function(filter = list(), SPECIES) {
   f <- c(filter)
   if (!is.null(SPECIES)) {
     f$taxonomy$species = c(f$taxonomy$species, SPECIES)
+  }
+  f
+}
+
+
+#' Add filter by genus
+#' @param filter Existing filters (or blank list if not provided)
+#' @param INSTCODE List of WIEWS institute codes
+#' @export
+filter_INSTCODE <- function(filter = list(), INSTCODE) {
+  f <- c(filter)
+  if (!is.null(INSTCODE)) {
+    f$institute$code = c(f$institute$code, INSTCODE)
   }
   f
 }

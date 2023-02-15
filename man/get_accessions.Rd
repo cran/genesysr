@@ -9,6 +9,7 @@ get_accessions(
   page = 0,
   size = 1000,
   fields = NULL,
+  exclude = NULL,
   selector = NULL,
   at.least = NULL
 )
@@ -21,6 +22,8 @@ get_accessions(
 \item{size}{number of records to load per page (page size)}
 
 \item{fields}{list of fields to fetch from Genesys}
+
+\item{exclude}{list of field prefixes to exclude from the Genesys response}
 
 \item{selector}{NULL or a function to "select" variables of interest}
 

@@ -205,13 +205,14 @@ api2_url <- function(path) {
 }
 
 #' @keywords internal
-.get <- function(path, query = NULL) {
+.get <- function(path, query = NULL, accept = "application/json") {
   .check_auth()
   resp <- httr::GET(path, query = query, httr::add_headers(
-    Authorization = .genesysEnv$Authorization
+    Authorization = .genesysEnv$Authorization,
+    "Accept" = accept
   ))
-  if (httr::http_type(resp) != "application/json") {
-    stop("API did not return json", call. = FALSE)
+  if (httr::http_type(resp) != accept) {
+    stop("API did not return ", accept, " but Content-Type: ", httr::content(resp), ". See response content:\n", httr::content(resp), call. = FALSE)
   }
   resp
 }
@@ -227,17 +228,22 @@ api2_url <- function(path) {
 #' @keywords internal
 .post <- function(path, query = NULL, body = NULL, content.type = "application/json", accept = "application/json") {
   .check_auth()
-  content <- jsonlite::toJSON(body)
+  content <- jsonlite::toJSON(body, auto_unbox = TRUE)
   if (! is.null(body) && length(body) == 0) {
     # If body is provided, but has length of 0
     content <- "{}"
   }
   # print(paste("Body is:", content))
-  resp <- httr::POST(path, query = query, httr::add_headers(
-    Authorization = .genesysEnv$Authorization,
-    "Content-Type" = content.type,
-    "Accept" = accept
-  ), body = content)
+  resp <- httr::POST(path, query = query, 
+    httr::add_headers(
+      Authorization = .genesysEnv$Authorization,
+      "Content-Type" = content.type,
+      "Accept" = accept
+    ), 
+    # httr::verbose(),
+    body = content
+  )
+
   if (httr::status_code(resp) != 200) {
     stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200. See response content:\n", httr::content(resp), call. = FALSE)
   }

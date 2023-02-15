@@ -6,6 +6,7 @@
 \usage{
 mcpd_filter(
   filter = list(),
+  INSTCODE = NULL,
   DOI = NULL,
   ORIGCTY = NULL,
   SAMPSTAT = NULL,
@@ -15,6 +16,8 @@ mcpd_filter(
 }
 \arguments{
 \item{filter}{Existing filters (or blank list if not provided)}
+
+\item{INSTCODE}{WIEWS Institute Code of the holding institute}
 
 \item{DOI}{Accession DOI}
 
