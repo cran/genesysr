@@ -6,7 +6,7 @@ Note: See NEWS.md
 
 ## Installing the development version
 
-```R
+``` r
 devtools::install_git('https://gitlab.croptrust.org/genesys-pgr/genesysr')
 ```
 
@@ -20,7 +20,7 @@ devtools::install_git('https://gitlab.croptrust.org/genesys-pgr/genesysr')
 
 ## Setup and configuration
 
-```R
+``` r
 library('genesysr')
 
 # www.genesys-pgr.org
@@ -38,7 +38,7 @@ genesysr::setup(server = "http://localhost:8080",
 
 The package is configured with default **Genesys R client** credentials that require user authentication:
 
-```R
+``` r
 # Setup
 genesysr::setup_production()
 
@@ -48,9 +48,9 @@ genesysr::user_login()
 
 ## Client authentication
 
-Accessing Genesys **without user interaction** requires that a client is registered on Genesys with **client credentials** grant. Contact helpdesk@genesys-pgr.org for assistance.
+Accessing Genesys **without user interaction** requires that a client is registered on Genesys with **client credentials** grant. Contact [helpdesk\@genesys-pgr.org](mailto:helpdesk@genesys-pgr.org){.email} for assistance.
 
-```R
+``` r
 # Setup
 library('genesysr')
 genesysr::setup(server = "https://api.genesys-pgr.org",
@@ -63,7 +63,7 @@ genesysr::client_login()
 
 ## Query Genesys
 
-```R
+``` r
 filters <- mcpd_filter(ORIGCTY = c("DEU", "SVN"))
 accessions <- genesysr::get_accessions(filters)
 

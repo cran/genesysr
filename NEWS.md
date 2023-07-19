@@ -1,3 +1,7 @@
+## version 2.0.0
+
+- Upgraded `user_login()` for OAuth 2.1
+
 ## version 1.1.0
 
 - Added list_crops(), list_species() and list_institutes()

@@ -1,5 +1,5 @@
 Package: genesysr
-Version: 1.1.0
+Version: 2.0.0
 Title: Genesys PGR Client
 Description: Access data on plant genetic resources from genebanks around the world published on Genesys (<https://www.genesys-pgr.org>).
   Your use of data is subject to terms and conditions available at <https://www.genesys-pgr.org/content/legal/terms>.
@@ -13,14 +13,14 @@ Authors@R: c(person(family = "Global Crop Diversity Trust", role = c("cph")),
   person("Nora", "Castaneda", email = "nora.castaneda@croptrust.org", role = c("ctb")))
 Maintainer: Matija Obreza <matija.obreza@croptrust.org>
 Depends: R (>= 3.1.0)
-Imports: httr, jsonlite, dplyr, readr
+Imports: httr, jsonlite, dplyr, readr, httpuv, later
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2023-02-15 12:56:15 UTC; mobreza
+Packaged: 2023-07-19 04:38:34 UTC; mobreza
 Author: Global Crop Diversity Trust [cph],
   Matija Obreza [aut, cre],
   Nora Castaneda [ctb]
 Repository: CRAN
-Date/Publication: 2023-02-15 13:10:02 UTC
+Date/Publication: 2023-07-19 08:30:02 UTC

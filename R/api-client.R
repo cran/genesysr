@@ -14,6 +14,10 @@
 
 .genesysEnv <- new.env(parent = emptyenv())
 
+#' Reference to the server
+#' @keywords internal
+.LISTENER <- F
+
 #' Configure package defaults on load
 #' 
 #' @param libname Library name
@@ -88,6 +92,60 @@ authorization <- function(authorization) {
   }
 }
 
+# Start local HTTP server to receive verifier code
+#' @importFrom httpuv startServer
+#' @importFrom later later
+.start_local_http_server <- function(codeCallback) {
+  s <- httpuv::startServer("0.0.0.0", httpuv::randomPort(min=45670),
+   list(
+     call = function(req) {
+       # rlang::env_print(req)
+       match <- regexec("code=([^&]+)", req$QUERY_STRING)
+       mat <- regmatches(req$QUERY_STRING, match)
+       code <- NA
+       if (length(mat) > 0) {
+         code <- mat[[1]][2]
+       }
+       response <- list(
+         status = 200L,
+         headers = list(
+           'Content-Type' = 'text/plain'
+         ),
+         # body = paste("Thanks! Time:", Sys.time(), "Path requested:", req$QUERY_STRING, "Got code:", code)
+         body = ifelse(is.na(code), paste("Path requested:", req$QUERY_STRING), paste("Thanks! You can now return to R."))
+       )
+       if (!is.na(code)) { # We got the code!
+         later::later(function() { codeCallback(code) }, delay = 2); # This will register the code and stop the server
+       }
+       response
+     }
+   )
+  )
+  invisible(s)
+}
+
+.exchange_code_for_token <- function(verifier, redirectUri) {
+  url <- paste0(.genesysEnv$server, "/oauth/token")
+  resp <- httr::POST(url, body = list(
+    client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
+    redirect_uri = redirectUri,
+    grant_type = "authorization_code", code = verifier
+  ), encode = "form")
+  
+  if (httr::http_type(resp) != "application/json" || httr::status_code(resp) != 200) {
+    stop(paste("API did not return json", httr::content(resp, "text")), call. = FALSE)
+  }
+  
+  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
+  
+  authorization(paste("Bearer", parsed$access_token))
+  
+  invisible(structure(
+    parsed,
+    class = "genesys_auth"
+  ))
+}
+
 #' Login to Genesys as a user
 #'
 #' The authorization URL will open in a browser, ask the user to grant
@@ -99,35 +157,36 @@ authorization <- function(authorization) {
 #' @importFrom utils browseURL
 #' @export
 user_login <- function() {
+  if (typeof(.LISTENER) == "environment") {
+    httpuv::stopServer(.LISTENER)
+  }
+  
+  # browser()
+  codeCallback <- function(code) {
+    message(paste("Exchanging", code, "for access token."));
+    .exchange_code_for_token(code, redirectUri);
+    if (typeof(.LISTENER) == "environment") {
+      message("Stopping listener.");
+      httpuv::stopServer(.LISTENER)
+    }
+    .LISTENER <- F
+  }
+  .LISTENER <- .start_local_http_server(codeCallback);
+  redirectUri <- paste0("http://127.0.0.1:", .LISTENER$getPort())
+  message(paste("Waiting for confirmation on", redirectUri));
   url <- paste0(.genesysEnv$server, "/oauth/authorize")
+  message(paste("Going to", url))
+
   browseURL(httr::modify_url(url, query = list(
     client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
-    redirect_uri = "oob",
+    redirect_uri = redirectUri,
     scope = "read",
     response_type= "code"
-    )))
+  )))
 
-  code <- readline("Enter the authorization code: ");
-
-  url <- paste0(.genesysEnv$server, "/oauth/token")
-  resp <- httr::POST(url, body = list(
-    client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
-    redirect_uri = "oob",
-    grant_type = "authorization_code", code = code
-    ), encode = "form")
-
-  if (httr::http_type(resp) != "application/json" || httr::status_code(resp) != 200) {
-    stop(paste("API did not return json", httr::content(resp, "text")), call. = FALSE)
-  }
-
-  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
-
-  authorization(paste("Bearer", parsed$access_token))
-
-  invisible(structure(
-    parsed,
-    class = "genesys_auth"
-  ))
+  # code <- readline("Enter the authorization code: ");
+  # .exchange_code_for_token(code, redirectUri);
+  message("Please login to Genesys in the browser window");
 }
 
 
