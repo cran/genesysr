@@ -12,42 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 #' Max pages to retrieve
 #' @keywords internal
 .MAX_ALLOWED_PAGES <- 500
 
-#' Who am i?
+#' Who am i? Loads and prints the user profile from Genesys as JSON.
+#' You need to be logged in.
 #'
+#' @examples
+#' \dontrun{
+#'   # Login
+#'   setup_production()
+#'   user_login()
+#'   me()
+#' }
+#' 
 #' @export
 me <- function() {
   resp <- .api_call(api1_url("/me/profile"))
-  message(jsonlite::toJSON(resp, pretty = TRUE))
+  message(jsonlite::toJSON(jsonlite::fromJSON(resp), pretty = TRUE))
   invisible(resp)
 }
 
 
-#' Fetch accession passport data (paginated)
-#'
-#' @param filters an R \code{structure} with Genesys filters
-#' @param size number of records to load per page (page size)
-#' @param page the page index (0-based)
-#' @param selector NULL or a function to "select" variables of interest
-#'
-#' @seealso \code{\link{mcpd_filter}}
-#'
-#' @examples
-#' \dontrun{
-#'   # Retrieve accession data by country of origin
-#'   accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
-#' }
-#' 
+#' Fetch accession passport data page.
 #' @return Paged data structure
 #' @keywords internal
 .fetch_accessions_page <- function(filters = list(), page = 0, size = 1000, selector = NULL) {
   start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  resp <- .post(path = "/acn/list", query=list(p = page, l = size), body = filters)
+  resp <- .post(path = api1_url("/acn/query"), query=list(p = page, l = size, select = c("institute.code", "accessionNumber", "countryOfOrigin.code3")), body = filters)
   end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  paged <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
+  paged <- jsonlite::fromJSON(resp, simplifyVector = FALSE)
   message(paste("Retrieved page", page + 1, "of", paged$totalPages, "with", paged$numberOfElements, "rows in", end_time - start_time, "ms."))
   
   # Apply selector
@@ -57,7 +53,10 @@ me <- function() {
   paged
 }
 
-#' Fetch accession passport data
+#' Fetch accession passport data and return the paged data structure for further processing.
+#' \code{\link{get_accessions}} might be more useful as it returns a data table.
+#' 
+#' @seealso \code{\link{get_accessions}}
 #'
 #' @param filters an R \code{structure} with Genesys filters
 #' @param size number of records to load per page (page size)
@@ -68,15 +67,18 @@ me <- function() {
 #' @examples
 #' \dontrun{
 #'   # Retrieve all accession data by country of origin
-#'   accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
+#'   accessions <- genesysr::fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
 #'
 #'   # Fetch Musa
 #'   musa <- genesysr::fetch_accessions(list(taxonomy.genus = c('Musa')))
 #'
 #'   # Apply selector function
-#'   accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")), selector = function(x) {
-#'     list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
-#'   })
+#'   accessions <- genesysr::fetch_accessions(
+#'     mcpd_filter(ORIGCTY = c("DEU", "SVN")),
+#'     selector = function(x) {
+#'       list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
+#'     }
+#'   )
 #' }
 #' 
 #' @export
@@ -88,7 +90,7 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
   }
   
   # Fetch first page to determine number of records
-  paged <- .fetch_accessions_page(filters, page = 0, size, selector)
+  paged <- .fetch_accessions_page(filters, page = 0, size = size, selector = selector)
   pages <- paged$totalPages
   
   for (page in 1:pages) {
@@ -134,22 +136,14 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
     query <- c(query, excluded_fields)
   }
   resp <- .post(path = api1_url("/acn/list"), query = query, body = filters, accept = "text/csv")
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
-  }
-  if (httr::http_type(resp) != "text/csv") {
-    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
-  }
   end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  headers <- httr::headers(resp)
-  message(paste("Retrieved page", page + 1, "with", headers$`pagination-elements`, "rows in", end_time - start_time, "ms."))
+  message(paste("Retrieved page", page + 1, "in", end_time - start_time, "ms."))
   
-  body <- httr::content(resp, "text")
-  if (nchar(trimws(body)) == 0) {
+  if (nchar(trimws(resp)) == 0) {
     message(paste("Received 0 bytes"))
     data <- data.frame()
   } else {
-    data <- utils::read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+    data <- utils::read.csv(text = resp, quote = '"', sep = '\t', stringsAsFactors = FALSE)
     
     # Apply selector
     if (is.function(selector)) {
@@ -160,7 +154,7 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
 }
 
 
-#' Fetch accession passport data
+#' Get accession passport data as a data table.
 #'
 #' @param filters an R \code{structure} with Genesys filters
 #' @param size number of records to load per page (page size)
@@ -182,14 +176,14 @@ fetch_accessions <- function(filters = list(), page = NULL, size = 1000, selecto
 #'     fields = c("accessionNumber", "geo"))
 #'
 #'   # Apply selector function
-#'   accessions <- get_accessions(mcpd_filter(ORIGCTY = c('DEU', 'SVN')),
+#'   accessions <- genesysr::get_accessions(mcpd_filter(ORIGCTY = c('DEU', 'SVN')),
 #'     selector = function(x) {
 #'       list(id = x$id, acceNumb = x$accessionNumber, instCode = x$instituteCode)
 #'     }, at.least = 100)
 #' }
 #' 
 #' @export
-#' @return Paged data structure
+#' @return Data table
 get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NULL, exclude = NULL, selector = NULL, at.least = NULL) {
 
   # Fetch first page to determine number of records
@@ -223,7 +217,7 @@ get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NUL
 }
 
 
-#' Download all passport data for one genebank in Excel format and save it to disk
+#' Download passport data for one genebank in Excel format and save it to disk
 #'
 #' @param instituteCode FAO WIEWS institute code
 #' @param file Target file name. Defaults to Genesys-provided file name in the current working directory.
@@ -231,31 +225,40 @@ get_accessions <- function(filters = list(), page = 0, size = 1000, fields = NUL
 #' @examples
 #' \dontrun{
 #'   # Download MCPD passport data for NGA039
-#'   excelData <- download_mcpd("NGA039")
+#'   excelFile <- download_mcpd("NGA039")
 #' }
 #' 
 #' @export
-#' @return HTTP response data
+#' @return The downloaded MCPD file name
 download_mcpd <- function(instituteCode, file = NULL) {
   if (is.na(instituteCode)) {
     stop("instituteCode parameter is required")
   }
-
   if (is.null(file)) {
     file <- paste0("genesys-accessions-", instituteCode, ".xlsx")
   }
-
-  resp <- httr::POST(
-    api1_url(paste0("/wiews/", instituteCode, "/download")),
-    body = list(mcpd = "mcpd"), encode = "form",
-    httr::write_disk(file),
-    httr::add_headers(
-      Authorization = .genesysEnv$Authorization
-    )) # , httr::verbose())
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
+  if (file.exists(file)) {
+    stop(paste("Target file", file, "exists. Refusing to overwrite."))
   }
-  invisible(resp)
+
+  outputFile <- file(description = file, blocking = T, raw = T, open = "wb")
+  write_bytes <- function(x) {
+    cat(".")
+    writeBin(x, outputFile)
+    TRUE
+  }
+
+  req <- .api_request(
+    method = "post",
+    path = api1_url(paste0("/wiews/", instituteCode, "/download")),
+  ) %>%
+    httr2::req_body_form(mcpd = "mcpd");
+
+  req %>% httr2::req_stream(write_bytes, buffer_kb = 32)
+
+  close(outputFile)
+  message("Done.")
+  invisible(file)
 }
 
 
@@ -271,27 +274,37 @@ download_mcpd <- function(instituteCode, file = NULL) {
 #' }
 #' 
 #' @export
-#' @return HTTP response data
+#' @return The downloaded PDCI file name
 download_pdci <- function(instituteCode, file = NULL) {
   if (is.na(instituteCode)) {
     stop("instituteCode parameter is required")
   }
-  
   if (is.null(file)) {
     file <- paste0("genesys-pdci-", instituteCode, ".xlsx")
   }
-  
-  resp <- httr::POST(
-    api1_url(paste0("/wiews/", instituteCode, "/download")),
-    body = list(pdci = "pdci"), encode = "form",
-    httr::write_disk(file),
-    httr::add_headers(
-      Authorization = .genesysEnv$Authorization
-    )) # , httr::verbose())
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
+  if (file.exists(file)) {
+    stop(paste("Target file", file, "exists. Refusing to overwrite."))
   }
-  invisible(resp)
+  
+  outputFile <- file(description = file, blocking = T, raw = T, open = "wb")
+  write_bytes <- function(x) {
+    cat(".")
+    writeBin(x, outputFile)
+    TRUE
+  }
+  
+  req <- .api_request(
+    method = "post",
+    path = api1_url(paste0("/wiews/", instituteCode, "/download")),
+  ) %>%
+    httr2::req_body_form(pdci = "pdci");
+  
+  
+  req %>% httr2::req_stream(write_bytes, buffer_kb = 32)
+  
+  close(outputFile)
+  message("Done.")
+  invisible(file)
 }
 
 
@@ -310,23 +323,15 @@ download_pdci <- function(instituteCode, file = NULL) {
 list_crops <- function() {
   
   start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  resp <- .get(path = api1_url("/crops/list"), accept = "text/csv")
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
-  }
-  if (httr::http_type(resp) != "text/csv") {
-    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
-  }
+  resp <- .api_call(path = api1_url("/crops/list"), query = list(l=1000), accept = "text/csv")
   end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  headers <- httr::headers(resp)
   message(paste("Retrieved crops in", end_time - start_time, "ms."))
   
-  body <- httr::content(resp, "text")
-  if (nchar(trimws(body)) == 0) {
+  if (nchar(trimws(resp)) == 0) {
     message(paste("Received 0 bytes"))
     data <- data.frame()
   } else {
-    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+    data <- read.csv(text = resp, quote = '"', sep = '\t', stringsAsFactors = FALSE)
   }
   data
 }
@@ -351,22 +356,14 @@ list_species <- function(filters = list()) {
   
   start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
   resp <- .post(path = api1_url("/acn/species"), body = filters, accept = "text/csv")
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
-  }
-  if (httr::http_type(resp) != "text/csv") {
-    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
-  }
   end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  headers <- httr::headers(resp)
   message(paste("Retrieved taxonomic data in", end_time - start_time, "ms."))
   
-  body <- httr::content(resp, "text")
-  if (nchar(trimws(body)) == 0) {
+  if (nchar(trimws(resp)) == 0) {
     message(paste("Received 0 bytes"))
     data <- data.frame()
   } else {
-    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+    data <- read.csv(text = resp, quote = '"', sep = '\t', stringsAsFactors = FALSE)
   }
   data
 }
@@ -383,24 +380,42 @@ list_species <- function(filters = list()) {
 .fetch_csv_page <- function(path, filters = list(), accept = "text/csv", page = 0, size = 1000) {
   start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
   resp <- .post(path, query = list(l = size, p = page), body = filters, accept = accept)
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200.")
-  }
-  if (httr::http_type(resp) != accept) {
-    stop("API returned ", httr::http_type(resp), ". Expected text/csv.")
-  }
   end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
-  headers <- httr::headers(resp)
   message(paste("Retrieved institute data in", end_time - start_time, "ms."))
   
-  body <- httr::content(resp, "text")
-  if (nchar(trimws(body)) == 0) {
+  if (nchar(trimws(resp)) == 0) {
     message(paste("Received 0 bytes"))
     data <- data.frame()
   } else {
-    data <- read.csv(text = body, quote = '"', sep = '\t', stringsAsFactors = FALSE)
+    data <- read.csv(text = resp, quote = '"', sep = '\t', stringsAsFactors = FALSE)
   }
   data
+}
+
+#' Fetch a page of data from Genesys
+#' 
+#' @param path API path
+#' @param filters Filters
+#' @param accept Accepted content type
+#' @param page Page to request
+#' @param size Size of page
+#' 
+#' @keywords internal
+#' @import magrittr
+#' @importFrom dplyr select
+#' @importFrom tidyselect contains one_of
+.fetch_json_page <- function(path, filters = list(), accept = "application/json", page = 0, size = 1000) {
+  start_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  resp <- .post(path, query = list(l = size, p = page), body = filters, accept = accept)
+  end_time <- as.numeric(as.numeric(Sys.time())*1000, digits=15)
+  message(paste("Retrieved JSON page in", end_time - start_time, "ms."))
+  
+  .result <- jsonlite::fromJSON(resp, flatten = T)
+  if (is.list(.result$content)) {
+    .result <- .result$content # Ignore the rest
+  }
+  .result <- .result %>% select(-contains('_permissions'), -one_of('createdBy', 'lastModifiedBy', '_class')) # Remove Genesys stuff
+  return(.result)
 }
 
 #' List FAO WIEWS institutes.

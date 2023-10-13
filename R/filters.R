@@ -85,7 +85,7 @@ filter_DOI <- function(filter = list(), DOI) {
 filter_ORIGCTY <- function(filter = list(), ORIGCTY) {
   f <- c(filter)
   if (!is.null(ORIGCTY)) {
-    f$countryOfOrigin$iso3 = c(f$countryOfOrigin$iso3, ORIGCTY)
+    f$countryOfOrigin$code3 = c(f$countryOfOrigin$code3, ORIGCTY)
   }
   f
 }

@@ -12,7 +12,7 @@ download_pdci(instituteCode, file = NULL)
 \item{file}{Target file name. Defaults to Genesys-provided file name in the current working directory.}
 }
 \value{
-HTTP response data
+The downloaded PDCI file name
 }
 \description{
 Download PDCI data for one genebank in Excel format and save it to disk.

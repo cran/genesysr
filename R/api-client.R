@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.genesysEnv <- new.env(parent = emptyenv())
 
-#' Reference to the server
-#' @keywords internal
-.LISTENER <- F
+.VERSION = packageVersion("genesysr")
+.genesysEnv <- new.env(parent = emptyenv())
 
 #' Configure package defaults on load
 #' 
@@ -68,6 +66,7 @@ setup <- function(server = NULL, client_id = NULL, client_secret = NULL) {
 #'
 #' @export
 print_setup <- function() {
+  message(paste("genesysr:", .VERSION))
   message(paste("Genesys URL:", .genesysEnv$server))
   message(paste("Client ID:", .genesysEnv$client_id))
   message(paste("Client secret:", .genesysEnv$client_secret))
@@ -92,101 +91,38 @@ authorization <- function(authorization) {
   }
 }
 
-# Start local HTTP server to receive verifier code
-#' @importFrom httpuv startServer
-#' @importFrom later later
-.start_local_http_server <- function(codeCallback) {
-  s <- httpuv::startServer("0.0.0.0", httpuv::randomPort(min=45670),
-   list(
-     call = function(req) {
-       # rlang::env_print(req)
-       match <- regexec("code=([^&]+)", req$QUERY_STRING)
-       mat <- regmatches(req$QUERY_STRING, match)
-       code <- NA
-       if (length(mat) > 0) {
-         code <- mat[[1]][2]
-       }
-       response <- list(
-         status = 200L,
-         headers = list(
-           'Content-Type' = 'text/plain'
-         ),
-         # body = paste("Thanks! Time:", Sys.time(), "Path requested:", req$QUERY_STRING, "Got code:", code)
-         body = ifelse(is.na(code), paste("Path requested:", req$QUERY_STRING), paste("Thanks! You can now return to R."))
-       )
-       if (!is.na(code)) { # We got the code!
-         later::later(function() { codeCallback(code) }, delay = 2); # This will register the code and stop the server
-       }
-       response
-     }
-   )
-  )
-  invisible(s)
-}
-
-.exchange_code_for_token <- function(verifier, redirectUri) {
-  url <- paste0(.genesysEnv$server, "/oauth/token")
-  resp <- httr::POST(url, body = list(
-    client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
-    redirect_uri = redirectUri,
-    grant_type = "authorization_code", code = verifier
-  ), encode = "form")
-  
-  if (httr::http_type(resp) != "application/json" || httr::status_code(resp) != 200) {
-    stop(paste("API did not return json", httr::content(resp, "text")), call. = FALSE)
-  }
-  
-  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
-  
-  authorization(paste("Bearer", parsed$access_token))
-  
-  invisible(structure(
-    parsed,
-    class = "genesys_auth"
-  ))
-}
 
 #' Login to Genesys as a user
 #'
 #' The authorization URL will open in a browser, ask the user to grant
-#' permissions to R and the verification code must be copy-pasted after
-#' you grant access to the client.
-#'
+#' permissions to R. After successful authentication the browser will 
+#' display a message:
+#' 
+#' ```
+#' Authentication complete. Please close this page and return to R.
+#' ```
+#' 
 #' @seealso \code{\link{setup}}
 #'
-#' @importFrom utils browseURL
+#' @importFrom httr2 oauth_client oauth_flow_auth_code
 #' @export
 user_login <- function() {
-  if (typeof(.LISTENER) == "environment") {
-    httpuv::stopServer(.LISTENER)
-  }
-  
+
   # browser()
-  codeCallback <- function(code) {
-    message(paste("Exchanging", code, "for access token."));
-    .exchange_code_for_token(code, redirectUri);
-    if (typeof(.LISTENER) == "environment") {
-      message("Stopping listener.");
-      httpuv::stopServer(.LISTENER)
-    }
-    .LISTENER <- F
+  client <- oauth_client(
+    id = .genesysEnv$client_id,
+    secret = .genesysEnv$client_secret,
+    token_url = paste0(.genesysEnv$server, "/oauth/token"),
+    auth = "body",
+#    name = "Genesys R"
+  )
+  if (interactive()) {
+    message("Please login to Genesys in the browser window");
+    token <- oauth_flow_auth_code(client, pkce = T, host_name = "127.0.0.1", scope = "openid", auth_url = paste0(.genesysEnv$server, "/oauth/authorize"))
+    # browser()
+    authorization(paste("Bearer", token$access_token))
+    invisible(token)
   }
-  .LISTENER <- .start_local_http_server(codeCallback);
-  redirectUri <- paste0("http://127.0.0.1:", .LISTENER$getPort())
-  message(paste("Waiting for confirmation on", redirectUri));
-  url <- paste0(.genesysEnv$server, "/oauth/authorize")
-  message(paste("Going to", url))
-
-  browseURL(httr::modify_url(url, query = list(
-    client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
-    redirect_uri = redirectUri,
-    scope = "read",
-    response_type= "code"
-  )))
-
-  # code <- readline("Enter the authorization code: ");
-  # .exchange_code_for_token(code, redirectUri);
-  message("Please login to Genesys in the browser window");
 }
 
 
@@ -196,83 +132,96 @@ user_login <- function() {
 #'
 #' @seealso \code{\link{setup}}
 #'
+#' @importFrom httr2 oauth_client oauth_flow_client_credentials
 #' @export
 client_login <- function() {
-  url <- paste0(.genesysEnv$server, "/oauth/token")
-  resp <- httr::POST(url, body = list(
-    client_id = .genesysEnv$client_id, client_secret = .genesysEnv$client_secret,
-    grant_type = "client_credentials"
-  ), encode = "form")
 
-  if (httr::http_type(resp) != "application/json" || httr::status_code(resp) != 200) {
-    stop("API did not return json", call. = FALSE)
-  }
+  client <- oauth_client(
+    id = .genesysEnv$client_id,
+    secret = .genesysEnv$client_secret,
+    token_url = paste0(.genesysEnv$server, "/oauth/token"),
+    name = "Genesys R"
+  )
+  token <- oauth_flow_client_credentials(client, scope = "openid", token_params = list())
 
-  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
-
-  authorization(paste("Bearer", parsed$access_token))
-
-  invisible(structure(
-    parsed,
-    class = "genesys_auth"
-  ))
+  authorization(paste("Bearer", token$access_token))
+  invisible(token)
 }
 
+# Prepare API request
+#' @keywords internal
+#' @import magrittr
+.api_request <- function(path, method = "get", accept = "application/json", query = NULL, body = NULL, content.type = "application/json") {
+  .check_auth()
+  
+  if (typeof(query$select) != "NULL") {
+    query$select <- paste(unlist(query$select), collapse=',')
+  }
+  
+  params <- query
+  if (!is.null(query)) names(params) <- paste0(names(params))
+  
+  #browser()
+  req <- httr2::request(base_url = .genesysEnv$server) %>%
+    httr2::req_url_path_append(path) %>%
+    httr2::req_headers(
+      Authorization = .genesysEnv$Authorization,
+      Accept = accept,
+    ) %>%
+    httr2::req_url_query(!!!params) %>%
+    httr2::req_method(method = method) %>%
+    httr2::req_user_agent(paste("genesysr", .VERSION, "(https://cran.r-project.org/package=genesysr)"))
+  
+  if (! is.null(body)) {
+    req <- req %>% httr2::req_body_raw(body = body, type = content.type);
+  }
+
+  invisible(req)
+}
 
 #' @keywords internal
-.api_call <- function(path, method = "get") {
-  .check_auth()
-  resp <- httr::GET(path, httr::add_headers(
-    Authorization = .genesysEnv$Authorization
-    )
-  )
-  resp
-  if (httr::http_type(resp) != "application/json") {
-    stop("API did not return json", call. = FALSE)
-  }
-  # return(resp)
-  parsed <- jsonlite::fromJSON(httr::content(resp, "text"), simplifyVector = FALSE)
-  return(parsed)
+#' @import magrittr
+.api_call <- function(path, method = "get", accept = "application/json", query = NULL, body = NULL, content.type = "application/json") {
+  req <- .api_request(path = path, method = method, accept = accept, query = query, body = body, content.type = content.type);
+  
+  resp <- req %>%
+    httr2::req_perform(verbosity = 0) %>% # Set verbosity to 3 for debugging
+    httr2::resp_body_string(encoding = "UTF8")
+
+  return(resp)
 }
 
 
-#' Get full Genesys API v1 URL for a specific path
+#' Get partial API v1 URL for the provided path
 #'
 #' @param path relative path of the API v1 endpoint (e.g. \code{/me})
 #'
-#' @return Absolute URL to an API call
+#' @return Returns "/api/v1" + path
 #' @export
 #'
 #' @examples
 #'  api1_url("/me")
 api1_url <- function(path) {
-  paste0(.genesysEnv$server, "/api/v1", path)
+  paste0("/api/v1", path)
 }
 
 
-#' Get full Genesys API v1 URL for a specific path
+#' Get partial API v2 URL for the provided path
 #'
-#' @param path relative path of the API v1 endpoint (e.g. \code{/me})
+#' @param path relative path of the API v2 endpoint (e.g. \code{/me})
 #'
-#' @return Absolute URL to an API call
+#' @return Returns "/api/v2" + path
 #' @export
 #'
 #' @examples
 #'  api2_url("/me")
 api2_url <- function(path) {
-  paste0(.genesysEnv$server, "/api/v2", path)
+  paste0("/api/v2", path)
 }
 
 #' @keywords internal
 .get <- function(path, query = NULL, accept = "application/json") {
-  .check_auth()
-  resp <- httr::GET(path, query = query, httr::add_headers(
-    Authorization = .genesysEnv$Authorization,
-    "Accept" = accept
-  ))
-  if (httr::http_type(resp) != accept) {
-    stop("API did not return ", accept, " but Content-Type: ", httr::content(resp), ". See response content:\n", httr::content(resp), call. = FALSE)
-  }
+  resp <- .api_call(path, query = query, accept = accept)
   resp
 }
 
@@ -286,32 +235,13 @@ api2_url <- function(path) {
 #' @return httr response
 #' @keywords internal
 .post <- function(path, query = NULL, body = NULL, content.type = "application/json", accept = "application/json") {
-  .check_auth()
   content <- jsonlite::toJSON(body, auto_unbox = TRUE)
   if (! is.null(body) && length(body) == 0) {
     # If body is provided, but has length of 0
     content <- "{}"
   }
   # print(paste("Body is:", content))
-  resp <- httr::POST(path, query = query, 
-    httr::add_headers(
-      Authorization = .genesysEnv$Authorization,
-      "Content-Type" = content.type,
-      "Accept" = accept
-    ), 
-    # httr::verbose(),
-    body = content
-  )
+  resp <- .api_call(path, method = "post", query = query, accept = accept, content.type = content.type, body = content)
 
-  if (httr::status_code(resp) != 200) {
-    stop("Genesys responded with HTTP status code ", httr::status_code(resp), ". Expected 200. See response content:\n", httr::content(resp), call. = FALSE)
-  }
-  if (httr::http_type(resp) != accept) {
-    stop("API did not return ", accept, " but Content-Type: ", httr::content(resp), ". See response content:\n", httr::content(resp), call. = FALSE)
-  }
-  
-  # if (httr::http_type(resp) != "application/json") {
-  #  stop("API did not return json", call. = FALSE)
-  # }
   resp
 }

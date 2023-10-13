@@ -2,7 +2,7 @@
 % Please edit documentation in R/api-client.R
 \name{api1_url}
 \alias{api1_url}
-\title{Get full Genesys API v1 URL for a specific path}
+\title{Get partial API v1 URL for the provided path}
 \usage{
 api1_url(path)
 }
@@ -10,10 +10,10 @@ api1_url(path)
 \item{path}{relative path of the API v1 endpoint (e.g. \code{/me})}
 }
 \value{
-Absolute URL to an API call
+Returns "/api/v1" + path
 }
 \description{
-Get full Genesys API v1 URL for a specific path
+Get partial API v1 URL for the provided path
 }
 \examples{
  api1_url("/me")

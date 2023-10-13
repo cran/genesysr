@@ -11,7 +11,7 @@ check_country(mcpd)
 \item{mcpd}{Accession passport data in MCPD format}
 }
 \value{
-Results from valdator
+Results from validator
 }
 \description{
 Run Land-or-Sea check on MCPD data. Uploads only rows where ORIGCTY,

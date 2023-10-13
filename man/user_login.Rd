@@ -8,8 +8,13 @@ user_login()
 }
 \description{
 The authorization URL will open in a browser, ask the user to grant
-permissions to R and the verification code must be copy-pasted after
-you grant access to the client.
+permissions to R. After successful authentication the browser will 
+display a message:
+}
+\details{
+```
+Authentication complete. Please close this page and return to R.
+```
 }
 \seealso{
 \code{\link{setup}}

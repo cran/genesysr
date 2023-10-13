@@ -12,7 +12,7 @@
 
 <meta name="author" content="Matija Obreza &amp; Nora Castaneda" />
 
-<meta name="date" content="2023-07-19" />
+<meta name="date" content="2023-10-13" />
 
 <title>genesysr Tutorial</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">genesysr Tutorial</h1>
 <h4 class="author">Matija Obreza &amp; Nora Castaneda</h4>
-<h4 class="date">2023-07-19</h4>
+<h4 class="date">2023-10-13</h4>
 
 
 
@@ -360,7 +360,7 @@ downloading data in CSV or Excel format and loading it into R.</p>
 <p>The database is queried by providing a <code>filter</code> (see
 Filters below):</p>
 <pre><code>## Setup: use Genesys Sandbox environment
-# genesysr::setup_sandbox()
+# genesysr::setup_sandbox() # Use this to connect to our test environment https://sandbox.genesys-pgr.org
 # genesysr::setup_production() # This is initialized by default when loading genesysr
 
 # Open a browser: login to Genesys and authorize access
@@ -433,17 +433,17 @@ match.</p>
 <p>The records returned by Genesys match all filters provided
 (<em>AND</em> operation), while individual filters allow for specifying
 multiple criteria (<em>OR</em> operation):</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (GENUS == Musa) AND ((ORIGCTY == NGA) OR (ORIGCTY == CIV))</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>filter <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>), <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&#39;aa&#39;</span>)), <span class="at">countryOfOrigin =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;NGA&#39;</span>, <span class="st">&#39;CIV&#39;</span>)))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># OR</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>filter <span class="ot">&lt;-</span> <span class="fu">list</span>();</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>filter<span class="sc">$</span>taxonomy<span class="sc">$</span>genus <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>filter<span class="sc">$</span>taxonomy<span class="sc">$</span>species <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;aa&#39;</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>filter<span class="sc">$</span>countryOfOrigin<span class="sc">$</span>iso3 <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;NGA&#39;</span>, <span class="st">&#39;CIV&#39;</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># See filter object as JSON</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># (GENUS == Musa) AND ((ORIGCTY == NGA) OR (ORIGCTY == CIV))</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>filter <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>), <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&#39;aa&#39;</span>)), <span class="at">countryOfOrigin =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;NGA&#39;</span>, <span class="st">&#39;CIV&#39;</span>)))</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># OR</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>filter <span class="ot">&lt;-</span> <span class="fu">list</span>();</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>filter<span class="sc">$</span>taxonomy<span class="sc">$</span>genus <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>filter<span class="sc">$</span>taxonomy<span class="sc">$</span>species <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;aa&#39;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>filter<span class="sc">$</span>countryOfOrigin<span class="sc">$</span>iso3 <span class="ot">=</span> <span class="fu">c</span>(<span class="st">&#39;NGA&#39;</span>, <span class="st">&#39;CIV&#39;</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># See filter object as JSON</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
 <p>There are a number of filtering options to retrieve data from
 Genesys. Best explore how filtering works on the actual website <a href="https://www.genesys-pgr.org/a/overview" class="uri">https://www.genesys-pgr.org/a/overview</a> by inspecting the
 HTTP requests sent by your browser to the API server and then
@@ -451,36 +451,36 @@ replicating them here.</p>
 <div id="taxonomy" class="section level3">
 <h3>Taxonomy</h3>
 <p><code>taxonomy$genus</code> filters by a <em>list</em> of genera.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Hordeum&#39;</span>, <span class="st">&#39;Musa&#39;</span>)))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Print</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Hordeum&#39;</span>, <span class="st">&#39;Musa&#39;</span>)))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co"># Print</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
 <p><code>taxonomy$species</code> filters by a <em>list</em> of
 species.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Hordeum&#39;</span>), <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&#39;vulgare&#39;</span>)))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Print</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Hordeum&#39;</span>), <span class="at">species =</span> <span class="fu">c</span>(<span class="st">&#39;vulgare&#39;</span>)))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># Print</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>jsonlite<span class="sc">::</span><span class="fu">toJSON</span>(filters)</span></code></pre></div>
 </div>
 <div id="origin-of-material" class="section level3">
 <h3>Origin of material</h3>
 <p><code>countryOfOrigin$iso3</code> filters by ISO3 code of country of
 origin of PGR material.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Material originating from Germany (DEU) and France (FRA)</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">countryOfOrigin =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;DEU&#39;</span>, <span class="st">&#39;FRA&#39;</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Material originating from Germany (DEU) and France (FRA)</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">countryOfOrigin =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;DEU&#39;</span>, <span class="st">&#39;FRA&#39;</span>)))</span></code></pre></div>
 <p><code>geo.latitude</code> and <code>geo.longitude</code> filters by
 latitude/longitude (in decimal format) of the collecting site.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TBD</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">geo =</span> <span class="fu">list</span>(<span class="at">latitude =</span> genesysr<span class="sc">::</span><span class="fu">range</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">30</span>), <span class="at">longitude =</span> genesysr<span class="sc">::</span><span class="fu">range</span>(<span class="dv">30</span>, <span class="dv">50</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># </span><span class="al">TBD</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>filters <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">geo =</span> <span class="fu">list</span>(<span class="at">latitude =</span> genesysr<span class="sc">::</span><span class="fu">range</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">30</span>), <span class="at">longitude =</span> genesysr<span class="sc">::</span><span class="fu">range</span>(<span class="dv">30</span>, <span class="dv">50</span>)))</span></code></pre></div>
 </div>
 <div id="holding-institute" class="section level3">
 <h3>Holding institute</h3>
 <p><code>institute$code</code> filters by a <em>list</em> of FAO WIEWS
 institute codes of the holding institutes.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for ITC (BEL084) and CIAT (COL003)</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(<span class="at">institute =</span> <span class="fu">list</span>(<span class="at">code =</span> <span class="fu">c</span>(<span class="st">&#39;BEL084&#39;</span>, <span class="st">&#39;COL003&#39;</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Filter for ITC (BEL084) and CIAT (COL003)</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">list</span>(<span class="at">institute =</span> <span class="fu">list</span>(<span class="at">code =</span> <span class="fu">c</span>(<span class="st">&#39;BEL084&#39;</span>, <span class="st">&#39;COL003&#39;</span>)))</span></code></pre></div>
 <p><code>institute$country$iso3</code> filters by a <em>list</em> of
 ISO3 country codes of country of the holding institute.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter for genebanks in Slovenia (SVN) and Belgium (BEL)</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(<span class="at">institute =</span> <span class="fu">list</span>(<span class="at">country =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;SVN&#39;</span>, <span class="st">&#39;BEL&#39;</span>))))</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Filter for genebanks in Slovenia (SVN) and Belgium (BEL)</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">list</span>(<span class="at">institute =</span> <span class="fu">list</span>(<span class="at">country =</span> <span class="fu">list</span>(<span class="at">iso3 =</span> <span class="fu">c</span>(<span class="st">&#39;SVN&#39;</span>, <span class="st">&#39;BEL&#39;</span>))))</span></code></pre></div>
 </div>
 </div>
 <div id="selecting-columns" class="section level1">
@@ -492,11 +492,11 @@ the columns of interest the <code>fields</code> vector:</p>
 musa &lt;- genesysr::get_accessions(list(taxonomy = list(genus = c(&#39;Musa&#39;))), fields = c(&quot;taxonomy&quot;, &quot;storage&quot;, &quot;id&quot;))</code></pre>
 <p>To list the variable names returned by the Genesys APIs, test the
 response and select columns of interest:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fetch_accessions uses the JSON format</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>accn <span class="ot">&lt;-</span> <span class="fu">fetch_accessions</span>(<span class="at">filters =</span> <span class="fu">list</span>(), <span class="at">at.least =</span> <span class="dv">100</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Print names used in JSON response from Genesys</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">names</span>(<span class="fu">unlist</span>(accn<span class="sc">$</span>content))))</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># fetch_accessions uses the JSON format</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>accn <span class="ot">&lt;-</span> <span class="fu">fetch_accessions</span>(<span class="at">filters =</span> <span class="fu">list</span>(), <span class="at">at.least =</span> <span class="dv">100</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># Print names used in JSON response from Genesys</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">names</span>(<span class="fu">unlist</span>(accn<span class="sc">$</span>content))))</span></code></pre></div>
 </div>
 <div id="step-by-step-example" class="section level1">
 <h1>Step-by-step example</h1>
@@ -505,20 +505,20 @@ data from Genesys.</p>
 <ol style="list-style-type: decimal">
 <li>Load genesysr</li>
 </ol>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(genesysr)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">library</span>(genesysr)</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Setup using user credentials</li>
 </ol>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setup_sandbox</span>()</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">user_login</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">setup_sandbox</span>()</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">user_login</span>()</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>Fetch data</li>
 </ol>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>musa <span class="ot">&lt;-</span> genesysr<span class="sc">::</span><span class="fu">get_accessions</span>(<span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>))), <span class="at">at.least =</span> <span class="dv">1000</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>musa <span class="ot">&lt;-</span> genesysr<span class="sc">::</span><span class="fu">get_accessions</span>(<span class="fu">list</span>(<span class="at">taxonomy =</span> <span class="fu">list</span>(<span class="at">genus =</span> <span class="fu">c</span>(<span class="st">&#39;Musa&#39;</span>))), <span class="at">at.least =</span> <span class="dv">1000</span>)</span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li>Identify columns of interest</li>
 </ol>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(musa)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">names</span>(musa)</span></code></pre></div>
 </div>
 
 

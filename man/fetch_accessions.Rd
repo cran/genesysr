@@ -2,7 +2,8 @@
 % Please edit documentation in R/genesys.R
 \name{fetch_accessions}
 \alias{fetch_accessions}
-\title{Fetch accession passport data}
+\title{Fetch accession passport data and return the paged data structure for further processing.
+\code{\link{get_accessions}} might be more useful as it returns a data table.}
 \usage{
 fetch_accessions(
   filters = list(),
@@ -27,20 +28,27 @@ fetch_accessions(
 Paged data structure
 }
 \description{
-Fetch accession passport data
+Fetch accession passport data and return the paged data structure for further processing.
+\code{\link{get_accessions}} might be more useful as it returns a data table.
 }
 \examples{
 \dontrun{
   # Retrieve all accession data by country of origin
-  accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
+  accessions <- genesysr::fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
 
   # Fetch Musa
   musa <- genesysr::fetch_accessions(list(taxonomy.genus = c('Musa')))
 
   # Apply selector function
-  accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")), selector = function(x) {
-    list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
-  })
+  accessions <- genesysr::fetch_accessions(
+    mcpd_filter(ORIGCTY = c("DEU", "SVN")),
+    selector = function(x) {
+      list(id = x$id, acceNumb = x$acceNumb, instCode = x$institute$code)
+    }
+  )
 }
 
+}
+\seealso{
+\code{\link{get_accessions}}
 }

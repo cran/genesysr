@@ -2,7 +2,7 @@
 % Please edit documentation in R/genesys.R
 \name{.fetch_accessions_page}
 \alias{.fetch_accessions_page}
-\title{Fetch accession passport data (paginated)}
+\title{Fetch accession passport data page.}
 \usage{
 .fetch_accessions_page(
   filters = list(),
@@ -11,29 +11,10 @@
   selector = NULL
 )
 }
-\arguments{
-\item{filters}{an R \code{structure} with Genesys filters}
-
-\item{page}{the page index (0-based)}
-
-\item{size}{number of records to load per page (page size)}
-
-\item{selector}{NULL or a function to "select" variables of interest}
-}
 \value{
 Paged data structure
 }
 \description{
-Fetch accession passport data (paginated)
-}
-\examples{
-\dontrun{
-  # Retrieve accession data by country of origin
-  accessions <- fetch_accessions(mcpd_filter(ORIGCTY = c("DEU", "SVN")))
-}
-
-}
-\seealso{
-\code{\link{mcpd_filter}}
+Fetch accession passport data page.
 }
 \keyword{internal}

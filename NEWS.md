@@ -1,3 +1,8 @@
+## version 2.1.0
+
+- Improved support for logging into Genesys with OAuth 2.1
+- Fixes issue with `setup_sandbox()` and `user_login()` that resulted in `invalid_client` error
+
 ## version 2.0.0
 
 - Upgraded `user_login()` for OAuth 2.1

@@ -13,26 +13,49 @@
 #'   taxaCheck <- genesysr::check_taxonomy(mcpd)
 #' }
 #' 
-#' @return Results from valdator
+#' @return Results from validator
 #' @export
 #' @importFrom utils write.table
 #' @importFrom readr read_delim
 check_taxonomy <- function(mcpd, toCurrentTaxa = FALSE) {
   DT <- dplyr::distinct(mcpd)
   # print(DT)
-
+  
   CSV <- tempfile(pattern = "taxa", tmpdir = tempdir(), fileext = ".csv")
   utils::write.table(DT, file = CSV, row.names = FALSE, dec=".", sep = "\t", quote = TRUE, na = "")
-
+  
   TMP <- tempfile(pattern = "taxa-res", tmpdir = tempdir(), fileext = ".csv")
-
-  # Requires toCurrentTaxa
-  response <- httr::POST("https://validator.genesys-pgr.org/process", body = list(
-    toCurrentTaxa = toCurrentTaxa,
-    separator = "\t", decimalMark = ".", escapeChar = "\\",
-    encoding = "UTF-8", csvText = readChar(CSV, file.info(CSV)$size)
-  ), encode = "multipart", httr::accept("text/csv"), httr::write_disk(TMP)) # , httr::verbose())
-
+  
+  if (file.exists(TMP)) {
+    stop(paste("Target file", TMP, "exists. Refusing to overwrite."))
+  }
+  
+  outputFile <- file(description = TMP, blocking = T, raw = T, open = "wb")
+  write_bytes <- function(x) {
+    cat(".")
+    writeBin(x, outputFile)
+    TRUE
+  }
+  
+  req <- httr2::request("https://validator.genesys-pgr.org/process") %>%
+    httr2::req_headers(
+      Accept = "text/csv",
+    ) %>%
+    httr2::req_method(method = "post") %>%
+    httr2::req_user_agent(paste("genesysr", .VERSION, "(https://cran.r-project.org/package=genesysr)")) %>%
+    httr2::req_body_multipart(
+      toCurrentTaxa = ifelse(toCurrentTaxa, "true", "false") , # Requires toCurrentTaxa
+      separator = "\t",
+      decimalMark = ".",
+      escapeChar = "\\",
+      encoding = "UTF-8",
+      csvText = readChar(CSV, file.info(CSV)$size)
+    );
+  
+  req %>% httr2::req_stream(write_bytes, buffer_kb = 32)
+  
+  close(outputFile)
+  message("Done.")
   R <- readr::read_delim(TMP, delim='\t', quote='"', escape_double=FALSE, escape_backslash=TRUE, show_col_types = FALSE)
   file.remove(CSV, TMP)
   invisible(R)
@@ -49,7 +72,7 @@ check_taxonomy <- function(mcpd, toCurrentTaxa = FALSE) {
 #'   waterCheck <- genesysr::check_landorsea(mcpd)
 #' }
 #' 
-#' @return Results from valdator
+#' @return Results from validator
 #' @export
 #' @importFrom utils write.table
 #' @importFrom readr read_delim
@@ -61,12 +84,36 @@ check_landorsea <- function(mcpd) {
 
   TMP <- tempfile(pattern = "landorsea-res", tmpdir = tempdir(), fileext = ".csv")
 
-  response <- httr::POST("https://validator.genesys-pgr.org/process", body = list(
-    validateType = "landorsea",
-    separator = "\t", decimalMark = ".", escapeChar = "\\",
-    encoding = "UTF-8", csvText = readChar(CSV, file.info(CSV)$size)
-  ), encode = "multipart", httr::accept("text/csv"), httr::write_disk(TMP)) # , httr::verbose())
+  if (file.exists(TMP)) {
+    stop(paste("Target file", TMP, "exists. Refusing to overwrite."))
+  }
   
+  outputFile <- file(description = TMP, blocking = T, raw = T, open = "wb")
+  write_bytes <- function(x) {
+    cat(".")
+    writeBin(x, outputFile)
+    TRUE
+  }
+  
+  req <- httr2::request("https://validator.genesys-pgr.org/process") %>%
+    httr2::req_headers(
+      Accept = "text/csv",
+    ) %>%
+    httr2::req_method(method = "post") %>%
+    httr2::req_user_agent(paste("genesysr", .VERSION, "(https://cran.r-project.org/package=genesysr)")) %>%
+    httr2::req_body_multipart(
+      validateType = "landorsea",
+      separator = "\t",
+      decimalMark = ".",
+      escapeChar = "\\",
+      encoding = "UTF-8",
+      csvText = readChar(CSV, file.info(CSV)$size)
+    );
+  
+  req %>% httr2::req_stream(write_bytes, buffer_kb = 32)
+  
+  close(outputFile)
+  message("Done.")
   R <- readr::read_delim(TMP, delim='\t', quote='"', escape_double=FALSE, escape_backslash=TRUE, show_col_types = FALSE)
   # print(R)
   file.remove(CSV, TMP)
@@ -83,7 +130,7 @@ check_landorsea <- function(mcpd) {
 #'   geoCheck <- genesysr::check_country(mcpd)
 #' }
 #' 
-#' @return Results from valdator
+#' @return Results from validator
 #' @export
 #' @importFrom utils write.table
 #' @importFrom readr read_delim
@@ -97,12 +144,37 @@ check_country <- function(mcpd) {
 
   TMP <- tempfile(pattern = "country-res", tmpdir = tempdir(), fileext = ".csv")
   
-  response <- httr::POST("https://validator.genesys-pgr.org/process", body = list(
-    validateType = "country",
-    separator = "\t", decimalMark = ".", escapeChar = "\\",
-    encoding = "UTF-8", csvText = readChar(CSV, file.info(CSV)$size)
-  ), encode = "multipart", httr::accept("text/csv"), httr::write_disk(TMP)) # , httr::verbose())
+  if (file.exists(TMP)) {
+    stop(paste("Target file", TMP, "exists. Refusing to overwrite."))
+  }
   
+  outputFile <- file(description = TMP, blocking = T, raw = T, open = "wb")
+  write_bytes <- function(x) {
+    cat(".")
+    writeBin(x, outputFile)
+    TRUE
+  }
+  
+  req <- httr2::request("https://validator.genesys-pgr.org/process") %>%
+    httr2::req_headers(
+      Accept = "text/csv",
+    ) %>%
+    httr2::req_method(method = "post") %>%
+    httr2::req_user_agent(paste("genesysr", .VERSION, "(https://cran.r-project.org/package=genesysr)")) %>%
+    httr2::req_body_multipart(
+      validateType = "country",
+      separator = "\t",
+      decimalMark = ".",
+      escapeChar = "\\",
+      encoding = "UTF-8",
+      csvText = readChar(CSV, file.info(CSV)$size)
+    );
+  
+  req %>% httr2::req_stream(write_bytes, buffer_kb = 32)
+  
+  close(outputFile)
+  message("Done.")
+
   R <- readr::read_delim(TMP, delim='\t', quote='"', escape_double=FALSE, escape_backslash=TRUE, show_col_types = FALSE)
   # print(R)
   file.remove(CSV, TMP)

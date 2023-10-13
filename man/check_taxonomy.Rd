@@ -13,7 +13,7 @@ check_taxonomy(mcpd, toCurrentTaxa = FALSE)
 \item{toCurrentTaxa}{Should obsoleted names be reported?}
 }
 \value{
-Results from valdator
+Results from validator
 }
 \description{
 Duplicate input rows are removed using dplyr::distinct() and results are

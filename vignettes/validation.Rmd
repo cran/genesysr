@@ -50,7 +50,7 @@ data with new `*_check` columns.
 Geo tests require `DECLATITUDE`, `DECLONGITUDE` and `ORIGCTY` for country border check and suggested coordinate fixes.
 
 
-|...|ORICTY|DECLATITUDE|DECLONGITUDE|
+|...|ORIGCTY|DECLATITUDE|DECLONGITUDE|
 |--|--|--|--|
 |...|DEU|20|30|
 |...|SVN|40|*NA*|

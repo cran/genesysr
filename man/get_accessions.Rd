@@ -2,7 +2,7 @@
 % Please edit documentation in R/genesys.R
 \name{get_accessions}
 \alias{get_accessions}
-\title{Fetch accession passport data}
+\title{Get accession passport data as a data table.}
 \usage{
 get_accessions(
   filters = list(),
@@ -30,10 +30,10 @@ get_accessions(
 \item{at.least}{stop fetching when at.least records are received from Genesys}
 }
 \value{
-Paged data structure
+Data table
 }
 \description{
-Fetch accession passport data
+Get accession passport data as a data table.
 }
 \examples{
 \dontrun{
@@ -45,7 +45,7 @@ Fetch accession passport data
     fields = c("accessionNumber", "geo"))
 
   # Apply selector function
-  accessions <- get_accessions(mcpd_filter(ORIGCTY = c('DEU', 'SVN')),
+  accessions <- genesysr::get_accessions(mcpd_filter(ORIGCTY = c('DEU', 'SVN')),
     selector = function(x) {
       list(id = x$id, acceNumb = x$accessionNumber, instCode = x$instituteCode)
     }, at.least = 100)

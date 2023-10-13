@@ -29,7 +29,7 @@ The database is queried by providing a `filter` (see Filters below):
 
 ```
 ## Setup: use Genesys Sandbox environment
-# genesysr::setup_sandbox()
+# genesysr::setup_sandbox() # Use this to connect to our test environment https://sandbox.genesys-pgr.org
 # genesysr::setup_production() # This is initialized by default when loading genesysr
 
 # Open a browser: login to Genesys and authorize access

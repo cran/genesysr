@@ -2,7 +2,7 @@
 % Please edit documentation in R/genesys.R
 \name{download_mcpd}
 \alias{download_mcpd}
-\title{Download all passport data for one genebank in Excel format and save it to disk}
+\title{Download passport data for one genebank in Excel format and save it to disk}
 \usage{
 download_mcpd(instituteCode, file = NULL)
 }
@@ -12,15 +12,15 @@ download_mcpd(instituteCode, file = NULL)
 \item{file}{Target file name. Defaults to Genesys-provided file name in the current working directory.}
 }
 \value{
-HTTP response data
+The downloaded MCPD file name
 }
 \description{
-Download all passport data for one genebank in Excel format and save it to disk
+Download passport data for one genebank in Excel format and save it to disk
 }
 \examples{
 \dontrun{
   # Download MCPD passport data for NGA039
-  excelData <- download_mcpd("NGA039")
+  excelFile <- download_mcpd("NGA039")
 }
 
 }

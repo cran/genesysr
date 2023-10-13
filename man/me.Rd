@@ -2,10 +2,21 @@
 % Please edit documentation in R/genesys.R
 \name{me}
 \alias{me}
-\title{Who am i?}
+\title{Who am i? Loads and prints the user profile from Genesys as JSON.
+You need to be logged in.}
 \usage{
 me()
 }
 \description{
-Who am i?
+Who am i? Loads and prints the user profile from Genesys as JSON.
+You need to be logged in.
+}
+\examples{
+\dontrun{
+  # Login
+  setup_production()
+  user_login()
+  me()
+}
+
 }
