@@ -1,3 +1,7 @@
+## version 2.1.1
+
+- Fixed issue with user_login() with httr2.
+
 ## version 2.1.0
 
 - Improved support for logging into Genesys with OAuth 2.1

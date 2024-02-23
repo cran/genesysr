@@ -4,7 +4,13 @@
 \alias{user_login}
 \title{Login to Genesys as a user}
 \usage{
-user_login()
+user_login(redirect_uri = "http://127.0.0.1:48913")
+}
+\arguments{
+\item{redirect_uri}{a custom redirect_uri to submit as part of the authentication request.
+This is most useful if the default port is blocked and you wish to specify
+another port: redirect_uri = "http://127.0.0.1:44211"
+Note that "http://127.0.0.1" is requred and that "http://localhost" will not work.}
 }
 \description{
 The authorization URL will open in a browser, ask the user to grant
@@ -15,6 +21,8 @@ display a message:
 ```
 Authentication complete. Please close this page and return to R.
 ```
+
+Close the browser and return to R.
 }
 \seealso{
 \code{\link{setup}}

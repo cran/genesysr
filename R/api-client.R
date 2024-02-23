@@ -95,18 +95,24 @@ authorization <- function(authorization) {
 #' Login to Genesys as a user
 #'
 #' The authorization URL will open in a browser, ask the user to grant
-#' permissions to R. After successful authentication the browser will 
-#' display a message:
+#' permissions to R.
 #' 
 #' ```
-#' Authentication complete. Please close this page and return to R.
-#' ```
 #' 
+#' After successful authentication the browser will display the message:
+#' "Authentication complete. Please close this page and return to R."
+#' 
+#' Close the browser and return to R.
+#' 
+#' @param redirect_uri a custom redirect_uri to submit as part of the authentication request.
+#'                     This is most useful if the default port is blocked and you wish to specify
+#'                     another port: `redirect_uri = "http://127.0.0.1:44211"`.
+#'                     Note that using `http://localhost` will not work.
 #' @seealso \code{\link{setup}}
 #'
 #' @importFrom httr2 oauth_client oauth_flow_auth_code
 #' @export
-user_login <- function() {
+user_login <- function(redirect_uri = "http://127.0.0.1:48913") {
 
   # browser()
   client <- oauth_client(
@@ -118,7 +124,7 @@ user_login <- function() {
   )
   if (interactive()) {
     message("Please login to Genesys in the browser window");
-    token <- oauth_flow_auth_code(client, pkce = T, host_name = "127.0.0.1", scope = "openid", auth_url = paste0(.genesysEnv$server, "/oauth/authorize"))
+    token <- oauth_flow_auth_code(client, pkce = T, scope = "openid", redirect_uri = redirect_uri, auth_url = paste0(.genesysEnv$server, "/oauth/authorize"))
     # browser()
     authorization(paste("Bearer", token$access_token))
     invisible(token)
